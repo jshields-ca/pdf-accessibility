@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Accessibility Tool</title>
+    <meta name="description" content="Evaluate and remediate PDF accessibility issues automatically">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="title-icon">♿</span>
+                    PDF Accessibility Tool
+                </h1>
+                <p class="app-subtitle">Automatically evaluate and remediate PDF accessibility issues</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section id="upload-section" class="section active">
+                <div class="upload-container">
+                    <h2>Upload Your PDF</h2>
+                    <p class="section-description">
+                        Upload a PDF document to analyze its accessibility and automatically fix issues where possible.
+                    </p>
+
+                    <form id="upload-form" class="upload-form">
+                        <div class="file-upload-area" id="file-upload-area">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">
+                                <p><strong>Drop your PDF here</strong> or <span class="upload-link">browse files</span></p>
+                                <p class="upload-hint">Maximum file size: 50MB</p>
+                            </div>
+                            <input type="file" id="pdf-file" name="pdf" accept=".pdf" required hidden>
+                        </div>
+
+                        <div class="wcag-level-section">
+                            <h3>WCAG Compliance Level</h3>
+                            <div class="wcag-options">
+                                <label class="wcag-option">
+                                    <input type="radio" name="wcagLevel" value="AA" checked>
+                                    <div class="option-content">
+                                        <strong>WCAG AA</strong>
+                                        <p>Standard compliance level required by most regulations</p>
+                                    </div>
+                                </label>
+                                <label class="wcag-option">
+                                    <input type="radio" name="wcagLevel" value="AAA">
+                                    <div class="option-content">
+                                        <strong>WCAG AAA</strong>
+                                        <p>Enhanced compliance with stricter requirements</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="analyze-btn" disabled>
+                            <span class="btn-icon">🔍</span>
+                            Analyze PDF
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress-section" class="section">
+                <div class="progress-container">
+                    <h2>Processing Your PDF</h2>
+                    <div class="progress-steps">
+                        <div class="step active" data-step="upload">
+                            <div class="step-icon">📤</div>
+                            <div class="step-label">Upload</div>
+                        </div>
+                        <div class="step" data-step="analyze">
+                            <div class="step-icon">🔍</div>
+                            <div class="step-label">Analyze</div>
+                        </div>
+                        <div class="step" data-step="remediate">
+                            <div class="step-icon">🔧</div>
+                            <div class="step-label">Remediate</div>
+                        </div>
+                        <div class="step" data-step="complete">
+                            <div class="step-icon">✅</div>
+                            <div class="step-label">Complete</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Uploading and analyzing PDF...</div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="section">
+                <div class="results-container">
+                    <h2>Analysis Complete</h2>
+                    
+                    <div class="results-summary" id="results-summary">
+                        <!-- Summary cards will be inserted here -->
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="btn btn-secondary" id="view-report-btn">
+                            <span class="btn-icon">📊</span>
+                            View Detailed Report
+                        </button>
+                        <button class="btn btn-primary" id="remediate-btn">
+                            <span class="btn-icon">🔧</span>
+                            Auto-Remediate Issues
+                        </button>
+                    </div>
+
+                    <div class="file-info" id="file-info">
+                        <!-- File information will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Remediation Section -->
+            <section id="remediation-section" class="section">
+                <div class="remediation-container">
+                    <h2>Remediation Complete</h2>
+                    
+                    <div class="remediation-summary" id="remediation-summary">
+                        <!-- Remediation results will be inserted here -->
+                    </div>
+
+                    <div class="remediation-actions">
+                        <button class="btn btn-secondary" id="final-report-btn">
+                            <span class="btn-icon">📊</span>
+                            View Final Report
+                        </button>
+                        <button class="btn btn-success" id="download-btn" style="display: none;">
+                            <span class="btn-icon">💾</span>
+                            Download Remediated PDF
+                        </button>
+                        <button class="btn btn-outline" id="start-over-btn">
+                            <span class="btn-icon">🔄</span>
+                            Analyze Another PDF
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p>&copy; 2024 PDF Accessibility Tool. Built for universal access.</p>
+                <div class="footer-links">
+                    <a href="#" onclick="showAbout()">About</a>
+                    <a href="#" onclick="showHelp()">Help</a>
+                    <a href="#" onclick="showPrivacy()">Privacy</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for additional information -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
