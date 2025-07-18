@@ -500,6 +500,16 @@ document.addEventListener('keydown', (e) => {
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new PDFAccessibilityApp();
+    // Modal and footer links event listeners
+    const aboutLink = document.getElementById('about-link');
+    const helpLink = document.getElementById('help-link');
+    const privacyLink = document.getElementById('privacy-link');
+    const modalClose = document.getElementById('modal-close');
+
+    if (aboutLink) aboutLink.addEventListener('click', (e) => { e.preventDefault(); showAbout(); });
+    if (helpLink) helpLink.addEventListener('click', (e) => { e.preventDefault(); showHelp(); });
+    if (privacyLink) privacyLink.addEventListener('click', (e) => { e.preventDefault(); showPrivacy(); });
+    if (modalClose) modalClose.addEventListener('click', closeModal);
 });
 
 // Service worker registration for PWA capabilities (optional)

@@ -1,0 +1,3437 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Accessibility Report - c7856dc2-44c6-4fc1-beb5-8b4b5a3cedd0-child_abuse_registry_application_form.pdf</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            border-bottom: 3px solid #007cba;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #007cba;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+        
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .meta-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007cba;
+        }
+        
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .status-analyzed { background: #e3f2fd; color: #1976d2; }
+        .status-remediated { background: #e8f5e8; color: #388e3c; }
+        
+        .summary {
+            margin-bottom: 40px;
+        }
+        
+        .summary h2 {
+            color: #007cba;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+        }
+        
+        .summary-card.critical { border-color: #dc3545; background: #f8d7da; }
+        .summary-card.moderate { border-color: #fd7e14; background: #ffeeba; }
+        .summary-card.minor { border-color: #28a745; background: #d4edda; }
+        
+        .summary-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            font-size: 1.1em;
+            color: #666;
+        }
+        
+        .compliance-status {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .compliance-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .compliance-fully-compliant { background: #d4edda; color: #155724; }
+        .compliance-partially-compliant { background: #ffeeba; color: #856404; }
+        .compliance-non-compliant { background: #f8d7da; color: #721c24; }
+        
+        .document-info, .issues-overview, .detailed-issues, .remediation-results, .recommendations, .wcag-guidelines {
+            margin-bottom: 40px;
+        }
+        
+        .document-info h2, .issues-overview h2, .detailed-issues h2, .remediation-results h2, .recommendations h2, .wcag-guidelines h2 {
+            color: #007cba;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .overview-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .severity-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .severity-label {
+            width: 80px;
+            font-weight: bold;
+        }
+        
+        .severity-count {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .severity-progress {
+            flex: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+        
+        .severity-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+        
+        .severity-fill.severity-critical { background: #dc3545; }
+        .severity-fill.severity-moderate { background: #fd7e14; }
+        .severity-fill.severity-minor { background: #28a745; }
+        
+        .wcag-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .wcag-rule {
+            font-weight: bold;
+            color: #007cba;
+        }
+        
+        .issue-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .issue-card.severity-critical { border-left: 5px solid #dc3545; }
+        .issue-card.severity-moderate { border-left: 5px solid #fd7e14; }
+        .issue-card.severity-minor { border-left: 5px solid #28a745; }
+        
+        .issue-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .issue-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .issue-number {
+            background: #007cba;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .issue-title h3 {
+            flex: 1;
+            color: #333;
+        }
+        
+        .severity-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .severity-badge.severity-critical { background: #dc3545; color: white; }
+        .severity-badge.severity-moderate { background: #fd7e14; color: white; }
+        .severity-badge.severity-minor { background: #28a745; color: white; }
+        
+        .issue-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .issue-meta span {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .issue-content {
+            padding: 15px;
+        }
+        
+        .issue-content > div {
+            margin-bottom: 10px;
+        }
+        
+        .fixable-true { color: #28a745; font-weight: bold; }
+        .fixable-false { color: #dc3545; font-weight: bold; }
+        
+        .fix-applied {
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .manual-reason {
+            background: #ffeeba;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #fd7e14;
+        }
+        
+        .no-issues {
+            text-align: center;
+            padding: 40px;
+            background: #d4edda;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        
+        .remediation-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .fixed-issues, .remaining-issues {
+            margin-top: 20px;
+        }
+        
+        .fixed-item, .remaining-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        .fixed-item {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        
+        .remaining-item {
+            background: #ffeeba;
+            border-left: 4px solid #fd7e14;
+        }
+        
+        .recommendations-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .recommendation-item {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .rec-number {
+            background: #007cba;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .rec-content h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .rec-priority {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .priority-high { background: #f8d7da; color: #721c24; }
+        .priority-medium { background: #ffeeba; color: #856404; }
+        .priority-low { background: #d4edda; color: #155724; }
+        
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .principle {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-top: 4px solid #007cba;
+        }
+        
+        .principle h4 {
+            color: #007cba;
+            margin-bottom: 10px;
+        }
+        
+        .principle ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .principle li {
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #dee2e6;
+            text-align: center;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .overview-charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .issue-meta {
+                flex-direction: column;
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>PDF Accessibility Report</h1>
+            <div class="report-meta">
+                <div class="meta-item">
+                    <strong>File:</strong> c7856dc2-44c6-4fc1-beb5-8b4b5a3cedd0-child_abuse_registry_application_form.pdf
+                </div>
+                <div class="meta-item">
+                    <strong>WCAG Level:</strong> AAA
+                </div>
+                <div class="meta-item">
+                    <strong>Status:</strong> <span class="status status-remediated">REMEDIATED</span>
+                </div>
+                <div class="meta-item">
+                    <strong>Generated:</strong> 7/18/2025, 2:33:46 PM
+                </div>
+                <div class="meta-item">
+                    <strong>Job ID:</strong> c7856dc2-44c6-4fc1-beb5-8b4b5a3cedd0
+                </div>
+            </div>
+        </header>
+
+        
+        <section class="summary">
+            <h2>Executive Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-number">64</div>
+                    <div class="summary-label">Total Issues</div>
+                </div>
+                <div class="summary-card critical">
+                    <div class="summary-number">1</div>
+                    <div class="summary-label">Critical</div>
+                </div>
+                <div class="summary-card moderate">
+                    <div class="summary-number">62</div>
+                    <div class="summary-label">Moderate</div>
+                </div>
+                <div class="summary-card minor">
+                    <div class="summary-number">1</div>
+                    <div class="summary-label">Minor</div>
+                </div>
+            </div>
+            
+            <div class="compliance-status">
+                <h3>Compliance Status</h3>
+                <div class="compliance-badge compliance-non-compliant">
+                    Non-Compliant
+                </div>
+                <p class="compliance-description">
+                    This document has 1 critical issue(s) that must be addressed for accessibility compliance.
+                </p>
+            </div>
+            
+            
+        <div class="remediation-summary-inline">
+            <h3>Remediation Summary</h3>
+            <p>
+                <strong>60</strong> issues were automatically fixed out of 
+                <strong>64</strong> total issues 
+                (<strong>94%</strong> success rate).
+                <strong>2</strong> issues require manual review.
+            </p>
+        </div>
+        </section>
+        
+        
+        
+        
+        <section class="issues-overview">
+            <h2>Issues Overview</h2>
+            
+            <div class="overview-charts">
+                <div class="chart-container">
+                    <h3>Issues by Severity</h3>
+                    <div class="severity-chart">
+                        
+                            <div class="severity-bar">
+                                <div class="severity-label">Critical</div>
+                                <div class="severity-count">1</div>
+                                <div class="severity-progress">
+                                    <div class="severity-fill severity-critical" style="width: 1.6129032258064515%"></div>
+                                </div>
+                            </div>
+                        
+                            <div class="severity-bar">
+                                <div class="severity-label">Moderate</div>
+                                <div class="severity-count">62</div>
+                                <div class="severity-progress">
+                                    <div class="severity-fill severity-moderate" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        
+                            <div class="severity-bar">
+                                <div class="severity-label">Minor</div>
+                                <div class="severity-count">1</div>
+                                <div class="severity-progress">
+                                    <div class="severity-fill severity-minor" style="width: 1.6129032258064515%"></div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Issues by WCAG Guideline</h3>
+                    <div class="wcag-chart">
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">1.3.1</span>
+                                <span class="wcag-count">2</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">2.4.5</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">1.4.3</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">1.3.2</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">4.1.2</span>
+                                <span class="wcag-count">56</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">3.1.1</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">1.4.6</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                            <div class="wcag-item">
+                                <span class="wcag-rule">3.3.5</span>
+                                <span class="wcag-count">1</span>
+                            </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        <section class="detailed-issues">
+            <h2>Detailed Issues</h2>
+            <div class="issues-list">
+                
+                    <div class="issue-card severity-critical">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">1</span>
+                                <h3>Document is not properly tagged</h3>
+                                <span class="severity-badge severity-critical">CRITICAL</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 1.3.1</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Document</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>PDF lacks proper structural tags required for screen readers</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Screen readers cannot navigate the document structure
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">2</span>
+                                <h3>Missing document outline/bookmarks</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 2.4.5</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Document</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Multi-page document lacks navigation bookmarks</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users cannot easily navigate between sections
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">3</span>
+                                <h3>Color contrast needs verification</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 1.4.3</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Text</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Color contrast should be manually verified to meet WCAG standards</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users with visual impairments may have difficulty reading text
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-false">
+                                    ❌ Manual review required
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">4</span>
+                                <h3>Reading order needs verification</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 1.3.2</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Document</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Document reading order should be verified for logical flow</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Screen readers may read content in incorrect order
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">5</span>
+                                <h3>Form field "completedAll" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">6</span>
+                                <h3>Form field "datedSigned" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">7</span>
+                                <h3>Form field "witnessDatedSigned" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">8</span>
+                                <h3>Form field "completedPt2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">9</span>
+                                <h3>Form field "provPhotocopy" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">10</span>
+                                <h3>Form field "witnessVerified" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">11</span>
+                                <h3>Form field "indicatedNumApps" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">12</span>
+                                <h3>Form field "DATE" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">13</span>
+                                <h3>Form field "DATE_2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">14</span>
+                                <h3>Form field "reset" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">15</span>
+                                <h3>Form field "Name" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">16</span>
+                                <h3>Form field "address" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">17</span>
+                                <h3>Form field "aptNo" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">18</span>
+                                <h3>Form field "Address Apt NoRow1" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">19</span>
+                                <h3>Form field "Text7" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">20</span>
+                                <h3>Form field "province" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">21</span>
+                                <h3>Form field "postalCode" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">22</span>
+                                <h3>Form field "lastName" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">23</span>
+                                <h3>Form field "firstName" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">24</span>
+                                <h3>Form field "midName" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">25</span>
+                                <h3>Form field "a Maiden Name" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">26</span>
+                                <h3>Form field "b Legal Name Change" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">27</span>
+                                <h3>Form field "c Also Known As" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">28</span>
+                                <h3>Form field "d Other Names Known by" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">29</span>
+                                <h3>Form field "Month" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">30</span>
+                                <h3>Form field "Day" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">31</span>
+                                <h3>Form field "Year" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">32</span>
+                                <h3>Form field "Current Address" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">33</span>
+                                <h3>Form field "telAreaCode" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">34</span>
+                                <h3>Form field "Telephone number" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">35</span>
+                                <h3>Form field "B3" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">36</span>
+                                <h3>Form field "CityProvince" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">37</span>
+                                <h3>Form field "Postal Code" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">38</span>
+                                <h3>Form field "Email optional" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">39</span>
+                                <h3>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 1" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">40</span>
+                                <h3>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">41</span>
+                                <h3>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 3" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">42</span>
+                                <h3>Form field "Type_2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">43</span>
+                                <h3>Form field "Type" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">44</span>
+                                <h3>Form field "Identification Number" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">45</span>
+                                <h3>Form field "Identification Number_2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">46</span>
+                                <h3>Form field "DATE_3" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">47</span>
+                                <h3>Form field "Subjects Name" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">48</span>
+                                <h3>Form field "addnlApps" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">49</span>
+                                <h3>Form field "addlAppsTotal" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">50</span>
+                                <h3>Form field "totalCostAddnlApps" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">51</span>
+                                <h3>Form field "ccAmount" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">52</span>
+                                <h3>Form field "visa1" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">53</span>
+                                <h3>Form field "visa2" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">54</span>
+                                <h3>Form field "visa3" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">55</span>
+                                <h3>Form field "visa4" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">56</span>
+                                <h3>Form field "expiryMonth" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">57</span>
+                                <h3>Form field "expiryYear" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">58</span>
+                                <h3>Form field "Cardholder Name print" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">59</span>
+                                <h3>Form field "receiptReq" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">60</span>
+                                <h3>Form field "paymentMethod" needs accessibility review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 4.1.2</span>
+                                <span class="page-info">Page: Unknown</span>
+                                <span class="element-info">Element: Form Field</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Form field should have proper labels and descriptions</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may not understand the purpose of form fields
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">61</span>
+                                <h3>Document language not specified</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 3.1.1</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Document</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>PDF should specify the primary language</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Screen readers may use incorrect pronunciation
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">62</span>
+                                <h3>Form accessibility needs review</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 1.3.1</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Form</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>Interactive forms require manual accessibility verification</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Form may not be usable with assistive technology
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-moderate">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">63</span>
+                                <h3>Enhanced color contrast verification needed</h3>
+                                <span class="severity-badge severity-moderate">MODERATE</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 1.4.6</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Text</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>AAA level requires 7:1 contrast ratio for normal text</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Enhanced accessibility for users with visual impairments
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-false">
+                                    ❌ Manual review required
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+                    <div class="issue-card severity-minor">
+                        <div class="issue-header">
+                            <div class="issue-title">
+                                <span class="issue-number">64</span>
+                                <h3>Context-sensitive help may be missing</h3>
+                                <span class="severity-badge severity-minor">MINOR</span>
+                            </div>
+                            <div class="issue-meta">
+                                <span class="wcag-rule">WCAG 3.3.5</span>
+                                <span class="page-info">Page: All</span>
+                                <span class="element-info">Element: Document</span>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="issue-description">
+                                <p>AAA level requires context-sensitive help for complex content</p>
+                            </div>
+                            
+                            <div class="issue-impact">
+                                <strong>Impact:</strong> Users may need additional assistance understanding content
+                            </div>
+                            
+                            <div class="issue-fixable">
+                                <strong>Auto-fixable:</strong> 
+                                <span class="fixable-true">
+                                    ✅ Yes
+                                </span>
+                            </div>
+                            
+                            
+                            
+                            
+                        </div>
+                    </div>
+                
+            </div>
+        </section>
+        
+        
+        <section class="remediation-results">
+            <h2>Remediation Results</h2>
+            
+            <div class="remediation-summary">
+                <div class="remediation-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">60</div>
+                        <div class="stat-label">Issues Fixed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">Require Manual Review</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">94%</div>
+                        <div class="stat-label">Auto-Fix Success Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            
+                <div class="fixed-issues">
+                    <h3>✅ Automatically Fixed Issues</h3>
+                    <div class="fixed-list">
+                        
+                            <div class="fixed-item">
+                                <strong>Document is not properly tagged</strong>
+                                <p>Applied basic document tags</p>
+                                <em>Added basic structural tags to document</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Missing document outline/bookmarks</strong>
+                                <p>Added basic document structure</p>
+                                <em>Created basic page-level bookmarks for navigation</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Document language not specified</strong>
+                                <p>Set document language</p>
+                                <em>Set primary document language to English</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Reading order needs verification</strong>
+                                <p>Optimized reading order</p>
+                                <em>Applied logical reading order to document structure</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "completedAll" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is completedAll</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "datedSigned" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is datedSigned</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "witnessDatedSigned" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is witnessDatedSigned</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "completedPt2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is completedPt2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "provPhotocopy" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is provPhotocopy</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "witnessVerified" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is witnessVerified</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "indicatedNumApps" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is indicatedNumApps</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "DATE" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is DATE</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "DATE_2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is DATE_2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "reset" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is reset</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Name" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Name</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "address" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is address</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "aptNo" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is aptNo</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Address Apt NoRow1" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Address Apt NoRow1</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Text7" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Text7</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "province" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is province</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "postalCode" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is postalCode</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "lastName" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is lastName</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "firstName" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is firstName</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "midName" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is midName</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "a Maiden Name" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is a Maiden Name</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "b Legal Name Change" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is b Legal Name Change</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "c Also Known As" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is c Also Known As</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "d Other Names Known by" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is d Other Names Known by</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Month" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Month</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Day" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Day</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Year" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Year</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Current Address" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Current Address</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "telAreaCode" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is telAreaCode</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Telephone number" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Telephone number</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "B3" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is B3</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "CityProvince" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is CityProvince</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Postal Code" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Postal Code</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Email optional" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Email optional</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 1" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Historical addresses Apart from your current address list any addresses where you have lived in the past five years 1</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Historical addresses Apart from your current address list any addresses where you have lived in the past five years 2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Historical addresses Apart from your current address list any addresses where you have lived in the past five years 3" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Historical addresses Apart from your current address list any addresses where you have lived in the past five years 3</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Type_2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Type_2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Type" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Type</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Identification Number" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Identification Number</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Identification Number_2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Identification Number_2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "DATE_3" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is DATE_3</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Subjects Name" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Subjects Name</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "addnlApps" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is addnlApps</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "addlAppsTotal" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is addlAppsTotal</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "totalCostAddnlApps" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is totalCostAddnlApps</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "ccAmount" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is ccAmount</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "visa1" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is visa1</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "visa2" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is visa2</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "visa3" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is visa3</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "visa4" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is visa4</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "expiryMonth" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is expiryMonth</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "expiryYear" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is expiryYear</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "Cardholder Name print" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is Cardholder Name print</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "receiptReq" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is receiptReq</em>
+                            </div>
+                        
+                            <div class="fixed-item">
+                                <strong>Form field "paymentMethod" needs accessibility review</strong>
+                                <p>Field already named</p>
+                                <em>Field name is paymentMethod</em>
+                            </div>
+                        
+                    </div>
+                </div>
+            
+            
+            
+                <div class="remaining-issues">
+                    <h3>⚠️ Issues Requiring Manual Review</h3>
+                    <div class="remaining-list">
+                        
+                            <div class="remaining-item">
+                                <strong>Color contrast needs verification</strong>
+                                <p>Color contrast requires manual review and adjustment</p>
+                            </div>
+                        
+                            <div class="remaining-item">
+                                <strong>Enhanced color contrast verification needed</strong>
+                                <p>Color contrast requires manual review and adjustment</p>
+                            </div>
+                        
+                    </div>
+                </div>
+            
+        </section>
+        
+        
+        <section class="recommendations">
+            <h2>Recommendations</h2>
+            <div class="recommendations-list">
+                
+                    <div class="recommendation-item">
+                        <div class="rec-number">1</div>
+                        <div class="rec-content">
+                            <h4>Address Critical Accessibility Issues</h4>
+                            <p>Focus on resolving critical issues first as they create significant barriers for users with disabilities.</p>
+                            <div class="rec-priority priority-high">
+                                Priority: HIGH
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="recommendation-item">
+                        <div class="rec-number">2</div>
+                        <div class="rec-content">
+                            <h4>Improve Document Structure</h4>
+                            <p>Add proper headings, tags, and bookmarks to improve navigation for screen reader users.</p>
+                            <div class="rec-priority priority-high">
+                                Priority: HIGH
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="recommendation-item">
+                        <div class="rec-number">3</div>
+                        <div class="rec-content">
+                            <h4>Review Color Contrast</h4>
+                            <p>Ensure all text meets minimum contrast ratios against background colors.</p>
+                            <div class="rec-priority priority-medium">
+                                Priority: MEDIUM
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="recommendation-item">
+                        <div class="rec-number">4</div>
+                        <div class="rec-content">
+                            <h4>Regular Accessibility Testing</h4>
+                            <p>Implement regular accessibility testing in your document creation workflow.</p>
+                            <div class="rec-priority priority-medium">
+                                Priority: MEDIUM
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="recommendation-item">
+                        <div class="rec-number">5</div>
+                        <div class="rec-content">
+                            <h4>Enhanced AAA Compliance</h4>
+                            <p>Consider additional enhancements for AAA compliance including enhanced contrast and context-sensitive help.</p>
+                            <div class="rec-priority priority-low">
+                                Priority: LOW
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+        </section>
+        
+        
+        <section class="wcag-guidelines">
+            <h2>WCAG AAA Guidelines Reference</h2>
+            <div class="guidelines-info">
+                <p>This report evaluates your document against WCAG AAA standards. Below are the key principles:</p>
+                
+                <div class="principles-grid">
+                    <div class="principle">
+                        <h4>1. Perceivable</h4>
+                        <p>Information must be presentable in ways users can perceive.</p>
+                        <ul>
+                            <li>Text alternatives for images</li>
+                            <li>Captions and alternatives for multimedia</li>
+                            <li>Content can be presented without losing meaning</li>
+                            <li>Make it easier for users to see and hear content</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="principle">
+                        <h4>2. Operable</h4>
+                        <p>Interface components must be operable by all users.</p>
+                        <ul>
+                            <li>All functionality available from keyboard</li>
+                            <li>Users have enough time to read content</li>
+                            <li>Content doesn't cause seizures</li>
+                            <li>Users can navigate and find content</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="principle">
+                        <h4>3. Understandable</h4>
+                        <p>Information and UI operation must be understandable.</p>
+                        <ul>
+                            <li>Text is readable and understandable</li>
+                            <li>Content appears and operates predictably</li>
+                            <li>Users are helped to avoid and correct mistakes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="principle">
+                        <h4>4. Robust</h4>
+                        <p>Content must be robust enough for various assistive technologies.</p>
+                        <ul>
+                            <li>Maximize compatibility with assistive technologies</li>
+                            <li>Use valid, semantic markup</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>Generated by PDF Accessibility Tool v1.0</p>
+            <p>For support and documentation, visit our help center.</p>
+        </footer>
+    </div>
+</body>
+</html>

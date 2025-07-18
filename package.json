@@ -1,7 +1,7 @@
 {
-  "name": "pdf-accessibility-app",
-  "version": "1.0.1",
-  "description": "Web application for PDF accessibility evaluation and automatic remediation",
+  "name": "pdf-accessibility",
+  "version": "0.0.1",
+  "description": "Web application for PDF accessibility evaluation and automatic remediation.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -51,6 +51,10 @@
     "remediation",
     "a11y"
   ],
-  "author": "PDF Accessibility Tool",
+  "author": "Jeremy Shields",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeremyshields/pdf-accessibility.git"
+  },
   "license": "MIT"
 }

@@ -1,6 +1,30 @@
 # PDF Accessibility Tool
 
+[![Build Status](https://img.shields.io/github/actions/workflow/status/jeremyshields/pdf-accessibility/ci.yml?branch=main)](https://github.com/jeremyshields/pdf-accessibility/actions)
+[![License](https://img.shields.io/github/license/jeremyshields/pdf-accessibility)](LICENSE)
+[![Version](https://img.shields.io/github/package-json/v/jeremyshields/pdf-accessibility)](package.json)
+[![Issues](https://img.shields.io/github/issues/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/graphs/contributors)
+
 A comprehensive web application for evaluating PDF accessibility and automatically remediating common issues according to WCAG AA and AAA standards.
+
+---
+
+**Author:** Jeremy Shields
+
+---
+
+## Project Status
+
+[![Project Status: Active – Maintained and supported](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/jeremyshields/pdf-accessibility)
+
+- **Current version:** 0.0.1 (initial/alpha release)
+- This project is actively maintained. Contributions, bug reports, and feature requests are welcome!
+- Expect rapid changes and improvements as the project matures.
+
+---
 
 ## Features
 
@@ -50,28 +74,23 @@ A comprehensive web application for evaluating PDF accessibility and automatical
    git clone <repository-url>
    cd pdf-accessibility-app
    ```
-
 2. **Install Node.js dependencies**
    ```bash
    npm install
    ```
-
 3. **Install Python dependencies**
    ```bash
    pip install -r requirements.txt
    ```
-
 4. **Configure environment**
    ```bash
    cp .env.example .env
    # Edit .env with your settings
    ```
-
 5. **Start the application**
    ```bash
    npm start
    ```
-
 6. **Access the application**
    - Open http://localhost:3000 in your browser
 
@@ -250,14 +269,12 @@ Application logs are written to:
    NODE_ENV=production
    PORT=80
    ```
-
 2. **Process Management**
    ```bash
    # Using PM2
    npm install -g pm2
    pm2 start server.js --name pdf-accessibility-tool
    ```
-
 3. **Reverse Proxy**
    Configure nginx or Apache to proxy requests to the Node.js server.
 
@@ -281,53 +298,26 @@ CMD ["npm", "start"]
 - Safari 13+
 - Edge 80+
 
-## Contributing
+## How to Contribute
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes
-4. Run tests: `npm test`
-5. Commit: `git commit -am 'Add feature'`
+4. Run tests and lint: `npm test && npm run lint`
+5. Commit using `npx cz` for conventional commits
 6. Push: `git push origin feature-name`
 7. Create a Pull Request
 
+## Community & Support
+
+- [Open an issue](https://github.com/jeremyshields/pdf-accessibility/issues) for bugs or feature requests
+- [Discussions](https://github.com/jeremyshields/pdf-accessibility/discussions) for Q&A and ideas
+- [Changelog](CHANGELOG.md) for release history
+
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Review the FAQ section
-
-## Changelog
-
-### v1.0.0
-- Initial release
-- WCAG AA/AAA analysis
-- Automatic remediation
-- HTML report generation
-- Modern web interface
-
-## FAQ
-
-### Q: What types of PDFs are supported?
-A: The tool supports all standard PDF files up to 50MB in size.
-
-### Q: How long does processing take?
-A: Analysis typically takes 10-30 seconds depending on file size and complexity.
-
-### Q: Are my files stored permanently?
-A: No, all files are automatically deleted after 24 hours for privacy and security.
-
-### Q: Can I integrate this with my existing application?
-A: Yes, the tool provides REST APIs for programmatic integration.
-
-### Q: What accessibility standards are covered?
-A: The tool covers WCAG 2.1 AA and AAA guidelines as well as PDF/UA standards.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ for universal accessibility.
+Built with ❤️ for universal accessibility by Jeremy Shields.

@@ -9,6 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
 </head>
 <body>
+    <a href="#main-content" class="visually-hidden focusable skip-link">Skip to main content</a>
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
@@ -20,7 +21,7 @@
             </div>
         </header>
 
-        <main class="main-content">
+        <main class="main-content" id="main-content">
             <!-- Upload Section -->
             <section id="upload-section" class="section active">
                 <div class="upload-container">
@@ -31,7 +32,8 @@
 
                     <form id="upload-form" class="upload-form">
                         <div class="file-upload-area" id="file-upload-area">
-                            <div class="upload-icon">📄</div>
+                            <div class="upload-icon" aria-label="Upload PDF" role="img">📄</div>
+                            <label for="pdf-file" class="visually-hidden">Select PDF file to upload</label>
                             <div class="upload-text">
                                 <p><strong>Drop your PDF here</strong> or <span class="upload-link">browse files</span></p>
                                 <p class="upload-hint">Maximum file size: 50MB</p>
@@ -153,24 +155,24 @@
             <div class="footer-content">
                 <p>&copy; 2024 PDF Accessibility Tool. Built for universal access.</p>
                 <div class="footer-links">
-                    <a href="#" onclick="showAbout()">About</a>
-                    <a href="#" onclick="showHelp()">Help</a>
-                    <a href="#" onclick="showPrivacy()">Privacy</a>
+                    <a href="#" id="about-link">About</a>
+                    <a href="#" id="help-link">Help</a>
+                    <a href="#" id="privacy-link">Privacy</a>
                 </div>
             </div>
         </footer>
     </div>
 
     <!-- Modal for additional information -->
-    <div id="modal" class="modal">
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <span class="modal-close" id="modal-close">&times;</span>
             <div id="modal-body"></div>
         </div>
     </div>
 
     <!-- Toast notifications -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
 </body>

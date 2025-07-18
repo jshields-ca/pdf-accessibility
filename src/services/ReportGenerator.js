@@ -26,19 +26,27 @@ class ReportGenerator {
         pdfInfo,
         accessibilityIssues,
         remediationResult,
-        wcagLevel = 'AA',
+        wcagLevel,
         status
       } = data;
 
       const reportPath = path.join(this.reportsDir, `${jobId}-report.html`);
       
+      // Always use the actual level, fallback to 'AA' if missing
+      const actualLevel = wcagLevel || 'AA';
+      if (!wcagLevel) {
+        console.warn(`[ReportGenerator] No WCAG level provided for job ${jobId}, defaulting to 'AA'`);
+      } else {
+        console.log(`[ReportGenerator] Generating report for job ${jobId} with WCAG level: ${actualLevel}`);
+      }
+
       const htmlContent = this.generateHTML({
         jobId,
         filename,
         pdfInfo,
         accessibilityIssues,
         remediationResult,
-        wcagLevel,
+        wcagLevel: actualLevel,
         status,
         generatedAt: new Date().toISOString()
       });
@@ -62,7 +70,7 @@ class ReportGenerator {
       jobId,
       filename,
       pdfInfo,
-      accessibilityIssues = [],
+      accessibilityIssues,
       remediationResult,
       wcagLevel,
       status,
@@ -274,7 +282,9 @@ class ReportGenerator {
         <section class="detailed-issues">
             <h2>Detailed Issues</h2>
             <div class="issues-list">
-                ${issues.map((issue, index) => `
+                ${issues.map((issue, index) => {
+                  const wcagUrl = this.getWCAGRuleUrl(issue.wcagRule);
+                  return `
                     <div class="issue-card severity-${issue.severity}">
                         <div class="issue-header">
                             <div class="issue-title">
@@ -283,7 +293,10 @@ class ReportGenerator {
                                 <span class="severity-badge severity-${issue.severity}">${issue.severity.toUpperCase()}</span>
                             </div>
                             <div class="issue-meta">
-                                <span class="wcag-rule">WCAG ${issue.wcagRule}</span>
+                                <span class="wcag-rule">
+                                  WCAG ${issue.wcagRule}
+                                  ${wcagUrl ? `<a href="${wcagUrl}" target="_blank" rel="noopener" class="wcag-link">🔗</a>` : ''}
+                                </span>
                                 <span class="page-info">Page: ${issue.page}</span>
                                 <span class="element-info">Element: ${issue.element}</span>
                             </div>
@@ -319,7 +332,7 @@ class ReportGenerator {
                             ` : ''}
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         </section>`;
   }
@@ -595,6 +608,30 @@ class ReportGenerator {
     }
     
     return recommendations;
+  }
+
+  /**
+   * Helper to map WCAG rule numbers to URLs
+   */
+  getWCAGRuleUrl(rule) {
+    if (!rule) return null;
+    const mapping = {
+      '1.1.1': 'non-text-content',
+      '1.3.1': 'info-and-relationships',
+      '1.3.2': 'meaningful-sequence',
+      '1.4.3': 'contrast-minimum',
+      '1.4.6': 'contrast-enhanced',
+      '2.4.2': 'page-titled',
+      '2.4.5': 'multiple-ways',
+      '2.4.9': 'link-purpose-link-only',
+      '2.4.10': 'section-headings',
+      '3.1.1': 'language-of-page',
+      '3.3.5': 'help',
+      '4.1.2': 'name-role-value',
+    };
+    const fragment = mapping[rule];
+    if (!fragment) return null;
+    return `https://www.w3.org/WAI/WCAG21/Understanding/${fragment}.html`;
   }
 
   /**
@@ -1015,6 +1052,17 @@ class ReportGenerator {
             border-top: 2px solid #dee2e6;
             text-align: center;
             color: #666;
+        }
+        
+        .wcag-link {
+            margin-left: 5px;
+            font-size: 0.8em;
+            color: #007cba;
+            text-decoration: none;
+        }
+        
+        .wcag-link:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 768px) {

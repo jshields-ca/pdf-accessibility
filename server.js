@@ -41,6 +41,15 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Generate jobId and attach to request before multer processes the file
+app.use('/api/analyze', (req, res, next) => {
+  req.jobId = uuidv4();
+  next();
+});
+
+// In-memory job info store (for demo; use DB for production)
+const jobInfo = {};
+
 // File upload configuration
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
@@ -53,8 +62,9 @@ const storage = multer.diskStorage({
     }
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = uuidv4();
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
+    // Use jobId from request if available
+    const jobId = req.jobId || uuidv4();
+    cb(null, `${jobId}-${file.originalname}`);
   }
 });
 
@@ -91,22 +101,36 @@ app.get('/', (req, res) => {
 app.post('/api/analyze', upload.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
+      console.error('No PDF file uploaded. req.file:', req.file);
       return res.status(400).json({ error: 'No PDF file uploaded' });
     }
 
     const { wcagLevel = 'AA' } = req.body;
-    const jobId = uuidv4();
-    
+    const jobId = req.jobId;
+
+    // Store job info for later remediation
+    jobInfo[jobId] = { wcagLevel };
+
+    // Log file info and uploads directory contents
+    console.log(`[ANALYZE] Uploaded file:`, req.file);
+    const uploadDir = './uploads';
+    try {
+      const files = await fs.readdir(uploadDir);
+      console.log(`[ANALYZE] Files in uploads dir:`, files);
+    } catch (err) {
+      console.error(`[ANALYZE] Error reading uploads dir:`, err);
+    }
+
     // Process PDF
-    console.log(`Starting analysis for job ${jobId}`);
+    console.log(`Starting analysis for job ${jobId}, file path: ${req.file.path}`);
     const pdfInfo = await pdfProcessor.extractInfo(req.file.path);
-    
+
     // Analyze accessibility
     const accessibilityIssues = await accessibilityAnalyzer.analyze(
-      req.file.path, 
+      req.file.path,
       wcagLevel
     );
-    
+
     // Generate initial report
     const reportPath = await reportGenerator.generateReport({
       jobId,
@@ -141,23 +165,35 @@ app.post('/api/remediate/:jobId', async (req, res) => {
     
     // Find original PDF file
     const uploadDir = './uploads';
-    const files = await fs.readdir(uploadDir);
+    let files;
+    try {
+      files = await fs.readdir(uploadDir);
+      console.log(`[REMEDIATE] Files in uploads dir:`, files);
+    } catch (err) {
+      console.error(`[REMEDIATE] Error reading uploads dir:`, err);
+      return res.status(500).json({ error: 'Failed to read uploads directory' });
+    }
     const pdfFile = files.find(file => file.includes(jobId));
+    console.log(`[REMEDIATE] Looking for file with jobId: ${jobId}, found: ${pdfFile}`);
     
     if (!pdfFile) {
       return res.status(404).json({ error: 'Original PDF not found' });
     }
     
     const originalPath = path.join(uploadDir, pdfFile);
+    console.log(`[REMEDIATE] Original PDF path: ${originalPath}`);
+    
+    // Use the original wcagLevel for this job, default to 'AA'
+    const wcagLevel = (jobInfo[jobId] && jobInfo[jobId].wcagLevel) || 'AA';
     
     // Re-analyze to get current issues
-    const accessibilityIssues = await accessibilityAnalyzer.analyze(originalPath, 'AA');
+    const accessibilityIssues = await accessibilityAnalyzer.analyze(originalPath, wcagLevel);
     
-    // Perform remediation
+    // Perform remediation, passing jobId for output filename
     const remediationResult = await remediationService.remediate(
       originalPath,
       accessibilityIssues,
-      { autoFix }
+      { autoFix, jobId }
     );
     
     // Generate final report
@@ -166,6 +202,7 @@ app.post('/api/remediate/:jobId', async (req, res) => {
       filename: pdfFile,
       accessibilityIssues,
       remediationResult,
+      wcagLevel, // ensure the report shows the correct level
       status: 'remediated'
     });
 
