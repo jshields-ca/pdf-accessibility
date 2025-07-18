@@ -1,12 +1,12 @@
 # PDF Accessibility Tool
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/jeremyshields/pdf-accessibility/ci.yml?branch=main)](https://github.com/jeremyshields/pdf-accessibility/actions)
-[![License](https://img.shields.io/github/license/jeremyshields/pdf-accessibility)](LICENSE)
-[![Version](https://img.shields.io/github/package-json/v/jeremyshields/pdf-accessibility)](package.json)
-[![Issues](https://img.shields.io/github/issues/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/pulls)
-[![Last Commit](https://img.shields.io/github/last-commit/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/commits/main)
-[![Contributors](https://img.shields.io/github/contributors/jeremyshields/pdf-accessibility)](https://github.com/jeremyshields/pdf-accessibility/graphs/contributors)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/jshields-ca/pdf-accessibility/ci.yml?branch=main)](https://github.com/jshields-ca/pdf-accessibility/actions)
+[![License](https://img.shields.io/github/license/jshields-ca/pdf-accessibility)](LICENSE)
+[![Version](https://img.shields.io/github/package-json/v/jshields-ca/pdf-accessibility)](package.json)
+[![Issues](https://img.shields.io/github/issues/jshields-ca/pdf-accessibility)](https://github.com/jshields-ca/pdf-accessibility/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/jshields-ca/pdf-accessibility)](https://github.com/jshields-ca/pdf-accessibility/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/jshields-ca/pdf-accessibility)](https://github.com/jshields-ca/pdf-accessibility/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/jshields-ca/pdf-accessibility)](https://github.com/jshields-ca/pdf-accessibility/graphs/contributors)
 
 A comprehensive web application for evaluating PDF accessibility and automatically remediating common issues according to WCAG AA and AAA standards.
 
