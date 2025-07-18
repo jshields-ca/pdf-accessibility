@@ -85,3 +85,6 @@ Thumbs.db
 
 # Reports directory (generated output)
 reports/ 
+
+# Uploads directory (user-uploaded files)
+uploads/ 
