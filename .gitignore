@@ -82,3 +82,6 @@ Thumbs.db
 
 # Linux system files
 *~ 
+
+# Reports directory (generated output)
+reports/ 
