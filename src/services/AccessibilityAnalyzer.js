@@ -1,402 +1,431 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { spawn } = require('child_process');
+'use strict';
+
 const PDFProcessor = require('./PDFProcessor');
+const { analyzePDF } = require('./PythonBridge');
+const logger = require('../logger');
 
 class AccessibilityAnalyzer {
   constructor() {
     this.pdfProcessor = new PDFProcessor();
-    this.wcagRules = {
-      'AA': this.getWCAGAARules(),
-      'AAA': this.getWCAGAAARules()
-    };
   }
 
   /**
-   * Analyze PDF for accessibility issues
+   * Analyze a PDF for accessibility issues against WCAG 2.1 AA or AAA.
+   * Returns { issues: Array, pythonEnhanced: boolean }.
+   *
+   * When Python libraries (pikepdf, pdfplumber) are available the analysis
+   * is authoritative.  When they are not, the analysis falls back to
+   * conservative heuristics derived from pdf-parse metadata.
    */
   async analyze(filePath, wcagLevel = 'AA') {
-    try {
-      console.log(`Analyzing PDF accessibility for WCAG ${wcagLevel}`);
-      
-      const pdfInfo = await this.pdfProcessor.extractInfo(filePath);
-      const structure = await this.pdfProcessor.getStructure(filePath);
-      const interactive = await this.pdfProcessor.hasInteractiveElements(filePath);
-      
-      const issues = [];
-      const rules = this.wcagRules[wcagLevel];
-      
-      // Run all accessibility checks
-      issues.push(...await this.checkDocumentStructure(pdfInfo, structure));
-      issues.push(...await this.checkTextAlternatives(filePath, pdfInfo));
-      issues.push(...await this.checkColorContrast(filePath));
-      issues.push(...await this.checkReadingOrder(pdfInfo));
-      issues.push(...await this.checkInteractiveElements(interactive));
-      issues.push(...await this.checkMetadata(pdfInfo));
-      issues.push(...await this.checkLanguage(pdfInfo));
-      issues.push(...await this.checkHeadingStructure(pdfInfo));
-      issues.push(...await this.checkTableStructure(filePath));
-      issues.push(...await this.checkFormFields(interactive));
-      
-      if (wcagLevel === 'AAA') {
-        issues.push(...await this.checkAAaSpecificRules(filePath, pdfInfo));
-      }
-      
-      // Sort issues by severity
-      issues.sort((a, b) => this.getSeverityWeight(a.severity) - this.getSeverityWeight(b.severity));
-      
-      return issues;
-    } catch (error) {
-      console.error('Error analyzing accessibility:', error);
-      throw new Error(`Failed to analyze accessibility: ${error.message}`);
+    logger.info({ filePath, wcagLevel }, 'Starting accessibility analysis');
+
+    const pdfInfo = await this.pdfProcessor.extractInfo(filePath);
+    const interactive = await this.pdfProcessor.hasInteractiveElements(filePath);
+
+    // Attempt deep Python-powered analysis; returns null on failure
+    const py = await analyzePDF(filePath);
+    const pythonEnhanced = py !== null;
+
+    if (py && py.errors && py.errors.length > 0) {
+      logger.warn({ errors: py.errors }, 'Python analysis partial errors');
     }
+
+    const issues = [];
+
+    issues.push(...this._checkDocumentStructure(pdfInfo, py));
+    issues.push(...this._checkTextAlternatives(pdfInfo, py));
+    issues.push(...this._checkColorContrast(py));
+    issues.push(...this._checkReadingOrder(pdfInfo, py));
+    issues.push(...this._checkMetadata(pdfInfo));
+    issues.push(...this._checkLanguage(py));
+    issues.push(...this._checkHeadingStructure(pdfInfo, py));
+    issues.push(...this._checkFormFields(interactive, py));
+
+    if (wcagLevel === 'AAA') {
+      issues.push(...this._checkAAAExtensions(py));
+    }
+
+    // Sort by severity: critical → moderate → minor
+    issues.sort(
+      (a, b) => this._severityWeight(a.severity) - this._severityWeight(b.severity)
+    );
+
+    logger.info(
+      { issueCount: issues.length, pythonEnhanced },
+      'Accessibility analysis complete'
+    );
+
+    return { issues, pythonEnhanced };
   }
 
-  /**
-   * Check document structure and tagging
-   */
-  async checkDocumentStructure(pdfInfo, structure) {
+  // ─── Individual checks ──────────────────────────────────────────────────────
+
+  _checkDocumentStructure(pdfInfo, py) {
     const issues = [];
-    
-    if (!structure.isTagged) {
+
+    const isTagged = py ? py.isTagged : false;
+    const hasBookmarks = py ? py.hasBookmarks : false;
+
+    if (!isTagged) {
       issues.push({
         id: 'structure-001',
         wcagRule: '1.3.1',
         severity: 'critical',
-        title: 'Document is not properly tagged',
-        description: 'PDF lacks proper structural tags required for screen readers',
+        title: 'Document is not tagged for accessibility',
+        description: py
+          ? 'PDF lacks MarkInfo/Marked and/or StructTreeRoot required for screen reader navigation. ' +
+            'Tagged PDFs expose the document structure (headings, paragraphs, lists, tables) to ' +
+            'assistive technology.'
+          : 'Unable to verify PDF tagging status (Python analysis unavailable). ' +
+            'Manual verification is required.',
         element: 'Document',
         page: 'All',
         fixable: true,
-        impact: 'Screen readers cannot navigate the document structure'
+        impact: 'Screen readers cannot navigate the document structure',
+        confident: py !== null,
       });
     }
-    
-    if (!structure.hasOutline && pdfInfo.pageCount > 3) {
+
+    if (!hasBookmarks && pdfInfo.pageCount > 3) {
       issues.push({
         id: 'structure-002',
         wcagRule: '2.4.5',
         severity: 'moderate',
-        title: 'Missing document outline/bookmarks',
-        description: 'Multi-page document lacks navigation bookmarks',
+        title: 'Missing document bookmarks/outline',
+        description:
+          'Multi-page documents should include a bookmark outline so users can quickly navigate ' +
+          'to sections without reading every page.',
         element: 'Document',
         page: 'All',
         fixable: true,
-        impact: 'Users cannot easily navigate between sections'
+        impact: 'Users cannot navigate between sections using the bookmark panel',
+        confident: py !== null,
       });
     }
-    
+
     return issues;
   }
 
-  /**
-   * Check for alternative text on images
-   */
-  async checkTextAlternatives(filePath, pdfInfo) {
+  _checkTextAlternatives(pdfInfo, py) {
     const issues = [];
-    
-    try {
-      const images = await this.pdfProcessor.extractImages(filePath);
-      
-      for (const pageImages of images) {
-        if (pageImages.imageCount > 0) {
-          issues.push({
-            id: `alt-text-${pageImages.pageNumber}`,
-            wcagRule: '1.1.1',
-            severity: 'critical',
-            title: 'Images may lack alternative text',
-            description: 'Images found that may not have proper alternative text',
-            element: 'Image',
-            page: pageImages.pageNumber,
-            fixable: true,
-            impact: 'Screen reader users cannot understand image content'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error checking images:', error);
+
+    if (!py) {
+      // Cannot determine image presence without Python — skip rather than false-positive every PDF
+      return issues;
     }
-    
+
+    for (const pageDatum of py.imagePages) {
+      if (pageDatum.imageCount > 0) {
+        issues.push({
+          id: `alt-text-p${pageDatum.page}`,
+          wcagRule: '1.1.1',
+          severity: 'critical',
+          title: `Page ${pageDatum.page}: ${pageDatum.imageCount} image(s) detected — alt text unverified`,
+          description:
+            `${pageDatum.imageCount} image XObject(s) detected on page ${pageDatum.page}. ` +
+            'Verifying whether alt text is embedded requires a full PDF/UA structure tree traversal; ' +
+            'provide descriptive alt text for all meaningful images.',
+          element: 'Image',
+          page: pageDatum.page,
+          fixable: false,
+          impact: 'Screen reader users cannot understand image content without alt text',
+          confident: true,
+        });
+      }
+    }
+
     return issues;
   }
 
-  /**
-   * Check color contrast
-   */
-  async checkColorContrast(filePath) {
+  _checkColorContrast(py) {
     const issues = [];
-    
-    // This is a placeholder - real implementation would analyze PDF colors
-    // and calculate contrast ratios
-    issues.push({
-      id: 'contrast-001',
-      wcagRule: '1.4.3',
-      severity: 'moderate',
-      title: 'Color contrast needs verification',
-      description: 'Color contrast should be manually verified to meet WCAG standards',
-      element: 'Text',
-      page: 'All',
-      fixable: false,
-      impact: 'Users with visual impairments may have difficulty reading text'
-    });
-    
+
+    if (!py || py.contrastIssues.length === 0) {
+      // If Python ran but found no issues, no issue to report.
+      // If Python is unavailable, flag for manual review.
+      if (!py) {
+        issues.push({
+          id: 'contrast-001',
+          wcagRule: '1.4.3',
+          severity: 'moderate',
+          title: 'Color contrast requires manual verification',
+          description:
+            'Automated color contrast analysis requires the Python pdfplumber library. ' +
+            'Manually verify that all text has a contrast ratio of at least 4.5:1 against its background.',
+          element: 'Text',
+          page: 'All',
+          fixable: false,
+          impact: 'Users with low vision may be unable to read low-contrast text',
+          confident: false,
+        });
+      }
+      return issues;
+    }
+
+    // Real contrast data from pdfplumber
+    for (const ci of py.contrastIssues) {
+      const { r, g, b } = ci.textColor;
+      issues.push({
+        id: `contrast-p${ci.page}-${r}-${g}-${b}`,
+        wcagRule: '1.4.3',
+        severity: ci.contrastRatio < 3.0 ? 'critical' : 'moderate',
+        title: `Page ${ci.page}: Text contrast ratio ${ci.contrastRatio}:1 (below 4.5:1 minimum)`,
+        description:
+          `Text with RGB color (${r}, ${g}, ${b}) against a white background has a measured contrast ` +
+          `ratio of ${ci.contrastRatio}:1, which fails WCAG AA (4.5:1 required for normal text, ` +
+          `3:1 for large text). AAA requires 7:1.`,
+        element: 'Text',
+        page: ci.page,
+        fixable: false,
+        impact: 'Users with low vision or colour blindness may be unable to read this text',
+        confident: true,
+      });
+    }
+
     return issues;
   }
 
-  /**
-   * Check reading order
-   */
-  async checkReadingOrder(pdfInfo) {
+  _checkReadingOrder(pdfInfo, py) {
     const issues = [];
-    
-    // Placeholder for reading order analysis
-    if (pdfInfo.textContent.length > 0) {
+    const isTagged = py ? py.isTagged : false;
+
+    // If the document is properly tagged, reading order is defined by the structure tree.
+    // If it is not tagged and has text content, reading order is undefined for AT.
+    if (!isTagged && pdfInfo.wordCount > 50) {
       issues.push({
         id: 'reading-order-001',
         wcagRule: '1.3.2',
         severity: 'moderate',
-        title: 'Reading order needs verification',
-        description: 'Document reading order should be verified for logical flow',
+        title: 'Reading order undefined — document is not tagged',
+        description:
+          'Without PDF structural tags, assistive technology reads content in the raw PDF byte ' +
+          'stream order, which may differ from the visual/logical reading order (e.g. multi-column ' +
+          'layouts, sidebars, footnotes). Tagging the document resolves this.',
         element: 'Document',
         page: 'All',
-        fixable: true,
-        impact: 'Screen readers may read content in incorrect order'
+        fixable: false,
+        impact: 'Screen readers may read content out of logical sequence',
+        confident: py !== null,
       });
     }
-    
+
     return issues;
   }
 
-  /**
-   * Check interactive elements
-   */
-  async checkInteractiveElements(interactive) {
+  _checkMetadata(pdfInfo) {
     const issues = [];
-    
-    if (interactive.hasForm) {
-      for (const field of interactive.fields) {
-        issues.push({
-          id: `form-${field.name}`,
-          wcagRule: '4.1.2',
-          severity: 'moderate',
-          title: `Form field "${field.name}" needs accessibility review`,
-          description: 'Form field should have proper labels and descriptions',
-          element: 'Form Field',
-          page: 'Unknown',
-          fixable: true,
-          impact: 'Users may not understand the purpose of form fields'
-        });
-      }
-    }
-    
-    return issues;
-  }
 
-  /**
-   * Check document metadata
-   */
-  async checkMetadata(pdfInfo) {
-    const issues = [];
-    
-    if (!pdfInfo.title || pdfInfo.title === 'Untitled') {
+    if (!pdfInfo.title) {
       issues.push({
         id: 'metadata-001',
         wcagRule: '2.4.2',
         severity: 'moderate',
         title: 'Missing document title',
-        description: 'PDF document lacks a descriptive title',
+        description:
+          'The PDF metadata does not include a Title field. Screen readers and browser tabs rely ' +
+          'on the document title to identify the file without requiring the user to read the content.',
         element: 'Document',
         page: 'All',
         fixable: true,
-        impact: 'Users cannot identify document purpose from title'
+        impact: 'Users cannot identify the document purpose from its title',
+        confident: true,
       });
     }
-    
+
     if (!pdfInfo.subject) {
       issues.push({
         id: 'metadata-002',
         wcagRule: '2.4.2',
         severity: 'minor',
-        title: 'Missing document subject',
-        description: 'PDF document lacks subject metadata',
+        title: 'Missing document subject/description',
+        description:
+          'The PDF metadata does not include a Subject field. This field provides an additional ' +
+          'layer of context and is surfaced by many document management systems.',
         element: 'Document',
         page: 'All',
         fixable: true,
-        impact: 'Document lacks descriptive information'
+        impact: 'Document lacks descriptive metadata for cataloguing and search',
+        confident: true,
       });
     }
-    
+
     return issues;
   }
 
-  /**
-   * Check language specification
-   */
-  async checkLanguage(pdfInfo) {
+  _checkLanguage(py) {
     const issues = [];
-    
-    // Placeholder for language detection
-    issues.push({
-      id: 'language-001',
-      wcagRule: '3.1.1',
-      severity: 'moderate',
-      title: 'Document language not specified',
-      description: 'PDF should specify the primary language',
-      element: 'Document',
-      page: 'All',
-      fixable: true,
-      impact: 'Screen readers may use incorrect pronunciation'
-    });
-    
-    return issues;
-  }
 
-  /**
-   * Check heading structure
-   */
-  async checkHeadingStructure(pdfInfo) {
-    const issues = [];
-    
-    // Simple check for potential headings based on text patterns
-    const text = pdfInfo.textContent;
-    const lines = text.split('\n').filter(line => line.trim().length > 0);
-    
-    let hasHeadingStructure = false;
-    
-    // Look for patterns that might indicate headings
-    for (const line of lines) {
-      if (line.length < 100 && /^[A-Z][A-Za-z\s]+$/.test(line.trim())) {
-        hasHeadingStructure = true;
-        break;
-      }
+    // If Python is unavailable we cannot reliably detect language presence.
+    // pdf-parse doesn't surface the /Lang catalog entry.
+    if (!py) {
+      issues.push({
+        id: 'language-001',
+        wcagRule: '3.1.1',
+        severity: 'moderate',
+        title: 'Document language not verifiable (Python unavailable)',
+        description:
+          'The primary language of the document could not be verified. Install Python with pikepdf ' +
+          'to enable language detection, or manually confirm /Lang is set in the PDF catalog.',
+        element: 'Document',
+        page: 'All',
+        fixable: true,
+        impact: 'Screen readers may use incorrect pronunciation and language rules',
+        confident: false,
+      });
+      return issues;
     }
-    
-    if (!hasHeadingStructure && pdfInfo.textContent.length > 1000) {
+
+    if (!py.hasLanguage) {
+      issues.push({
+        id: 'language-001',
+        wcagRule: '3.1.1',
+        severity: 'moderate',
+        title: 'Document language not specified',
+        description:
+          'The PDF catalog does not contain a /Lang entry. Without a declared language, screen ' +
+          'readers cannot select the correct voice profile and TTS engine.',
+        element: 'Document',
+        page: 'All',
+        fixable: true,
+        impact: 'Screen readers may mispronounce content or use wrong language rules',
+        confident: true,
+      });
+    }
+
+    return issues;
+  }
+
+  _checkHeadingStructure(pdfInfo, py) {
+    const issues = [];
+
+    if (!py) {
+      // Fallback: simple regex heuristic (same as original code)
+      const lines = pdfInfo.textContent.split('\n').filter((l) => l.trim().length > 0);
+      const hasHeadingPattern = lines.some(
+        (l) => l.length < 100 && /^[A-Z][A-Za-z\s]+$/.test(l.trim())
+      );
+      if (!hasHeadingPattern && pdfInfo.wordCount > 200) {
+        issues.push({
+          id: 'heading-001',
+          wcagRule: '1.3.1',
+          severity: 'moderate',
+          title: 'Heading structure unverifiable (Python unavailable)',
+          description:
+            'No heading patterns were detected in the text content. A document with substantial ' +
+            'text should use a clear heading hierarchy to aid navigation.',
+          element: 'Headings',
+          page: 'All',
+          fixable: false,
+          impact: 'Users cannot navigate document by headings',
+          confident: false,
+        });
+      }
+      return issues;
+    }
+
+    const headings = py.textAnalysis.possibleHeadings || [];
+    const hasText = py.textAnalysis.hasText;
+
+    if (hasText && headings.length === 0 && pdfInfo.wordCount > 200) {
       issues.push({
         id: 'heading-001',
         wcagRule: '1.3.1',
         severity: 'moderate',
-        title: 'Missing heading structure',
-        description: 'Long document appears to lack proper heading structure',
+        title: 'No heading structure detected in document',
+        description:
+          'Font-size analysis found no text significantly larger than the body font, suggesting ' +
+          'the document lacks visual heading differentiation. Proper headings (marked in the ' +
+          'structure tree or visually distinct) are essential for navigation.',
         element: 'Headings',
         page: 'All',
-        fixable: true,
-        impact: 'Users cannot navigate document by headings'
+        fixable: false,
+        impact: 'Users cannot navigate the document by headings using assistive technology',
+        confident: true,
       });
     }
-    
+
     return issues;
   }
 
-  /**
-   * Check table structure
-   */
-  async checkTableStructure(filePath) {
+  _checkFormFields(interactive, py) {
     const issues = [];
-    
-    // Placeholder for table analysis
-    // In a real implementation, this would detect tables and check for headers
-    
-    return issues;
-  }
 
-  /**
-   * Check form fields accessibility
-   */
-  async checkFormFields(interactive) {
-    const issues = [];
-    
-    if (interactive.hasForm) {
+    if (!interactive.hasForm) {
+      return issues;
+    }
+
+    // Use Python data for tooltip/label check when available
+    if (py && py.formFields.length > 0) {
+      for (const field of py.formFields) {
+        if (!field.hasTooltip) {
+          issues.push({
+            id: `form-tooltip-${field.name || 'unknown'}`,
+            wcagRule: '4.1.2',
+            severity: 'moderate',
+            title: `Form field "${field.name || '(unnamed)'}" is missing an accessible tooltip`,
+            description:
+              `The AcroForm field "${field.name || '(unnamed)'}" has no /TU (user-visible tooltip) ` +
+              'entry. Tooltips provide accessible labels that screen readers announce when the field ' +
+              'receives focus.',
+            element: 'Form Field',
+            page: 'Unknown',
+            fixable: true,
+            impact: 'Screen reader users may not understand what to enter in this field',
+            confident: true,
+          });
+        }
+      }
+    } else {
+      // No Python data — flag the form generically
       issues.push({
         id: 'form-001',
-        wcagRule: '1.3.1',
+        wcagRule: '4.1.2',
         severity: 'moderate',
-        title: 'Form accessibility needs review',
-        description: 'Interactive forms require manual accessibility verification',
+        title: 'Interactive form detected — accessibility requires verification',
+        description:
+          'The document contains AcroForm fields. Each field needs a /TU tooltip and proper ' +
+          'label association. Install Python with pikepdf for automated per-field checks.',
         element: 'Form',
         page: 'All',
         fixable: true,
-        impact: 'Form may not be usable with assistive technology'
+        impact: 'Form fields may not be usable with assistive technology',
+        confident: false,
       });
     }
-    
+
     return issues;
   }
 
-  /**
-   * Check AAA-specific rules
-   */
-  async checkAAaSpecificRules(filePath, pdfInfo) {
+  _checkAAAExtensions(py) {
     const issues = [];
-    
-    // Enhanced color contrast (AAA requires 7:1 ratio)
-    issues.push({
-      id: 'contrast-aaa-001',
-      wcagRule: '1.4.6',
-      severity: 'moderate',
-      title: 'Enhanced color contrast verification needed',
-      description: 'AAA level requires 7:1 contrast ratio for normal text',
-      element: 'Text',
-      page: 'All',
-      fixable: false,
-      impact: 'Enhanced accessibility for users with visual impairments'
-    });
-    
-    // Context-sensitive help
-    issues.push({
-      id: 'help-aaa-001',
-      wcagRule: '3.3.5',
-      severity: 'minor',
-      title: 'Context-sensitive help may be missing',
-      description: 'AAA level requires context-sensitive help for complex content',
-      element: 'Document',
-      page: 'All',
-      fixable: true,
-      impact: 'Users may need additional assistance understanding content'
-    });
-    
+
+    // Only add enhanced contrast issue if real contrast data was unavailable
+    // (If Python ran, contrast-specific issues are already in _checkColorContrast)
+    if (!py || py.contrastIssues.length === 0) {
+      issues.push({
+        id: 'contrast-aaa-001',
+        wcagRule: '1.4.6',
+        severity: 'moderate',
+        title: 'Enhanced contrast (7:1) requires manual verification',
+        description:
+          'WCAG AAA criterion 1.4.6 requires a contrast ratio of at least 7:1 for normal-sized ' +
+          'text. Manually verify all text in the document meets this enhanced threshold.',
+        element: 'Text',
+        page: 'All',
+        fixable: false,
+        impact: 'Users with severe visual impairments benefit from the higher contrast requirement',
+        confident: !py,
+      });
+    }
+
     return issues;
   }
 
-  /**
-   * Get WCAG AA rules
-   */
-  getWCAGAARules() {
-    return {
-      '1.1.1': 'Non-text Content',
-      '1.3.1': 'Info and Relationships',
-      '1.3.2': 'Meaningful Sequence',
-      '1.4.3': 'Contrast (Minimum)',
-      '2.4.2': 'Page Titled',
-      '2.4.5': 'Multiple Ways',
-      '3.1.1': 'Language of Page',
-      '4.1.2': 'Name, Role, Value'
-    };
-  }
+  // ─── Utilities ───────────────────────────────────────────────────────────────
 
-  /**
-   * Get WCAG AAA rules (includes AA rules plus additional)
-   */
-  getWCAGAAARules() {
-    return {
-      ...this.getWCAGAARules(),
-      '1.4.6': 'Contrast (Enhanced)',
-      '3.3.5': 'Help',
-      '2.4.9': 'Link Purpose (Link Only)',
-      '2.4.10': 'Section Headings'
-    };
-  }
-
-  /**
-   * Get severity weight for sorting
-   */
-  getSeverityWeight(severity) {
-    const weights = {
-      'critical': 1,
-      'moderate': 2,
-      'minor': 3
-    };
-    return weights[severity] || 4;
+  _severityWeight(severity) {
+    return { critical: 1, moderate: 2, minor: 3 }[severity] ?? 4;
   }
 }
 

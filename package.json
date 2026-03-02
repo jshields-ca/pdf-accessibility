@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "test": "jest --testEnvironment=node --forceExit",
+    "test:watch": "jest --testEnvironment=node --watch",
+    "test:coverage": "jest --testEnvironment=node --coverage --forceExit",
     "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
     "format": "prettier --write .",
     "prepare": "husky install",
     "release": "standard-version",
@@ -22,16 +26,23 @@
     "multer": "^1.4.5-lts.1",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "husky": "^8.0.0",
-    "lint-staged": "^15.0.0",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0",
     "commitizen": "^4.0.0",
     "cz-git": "^1.0.0",
-    "standard-version": "^9.0.0"
+    "eslint": "^8.0.0",
+    "husky": "^8.0.0",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.0.0",
+    "pino-pretty": "^13.0.0",
+    "prettier": "^3.0.0",
+    "standard-version": "^9.0.0",
+    "supertest": "^7.0.0"
   },
   "config": {
     "commitizen": {
@@ -54,7 +65,7 @@
   "author": "Jeremy Shields",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jeremyshields/pdf-accessibility.git"
+    "url": "https://github.com/jshields-ca/pdf-accessibility.git"
   },
   "license": "MIT"
 }

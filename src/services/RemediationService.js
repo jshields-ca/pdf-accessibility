@@ -1,407 +1,273 @@
+'use strict';
+
 const fs = require('fs').promises;
 const path = require('path');
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const { PDFDocument } = require('pdf-lib');
 const { v4: uuidv4 } = require('uuid');
+const { remediatePDF } = require('./PythonBridge');
+const logger = require('../logger');
 
 class RemediationService {
   constructor() {
-    this.outputDir = './output';
-    this.ensureOutputDir();
+    this.outputDir = process.env.OUTPUT_DIR || './output';
+    this._ensureOutputDir();
   }
 
-  async ensureOutputDir() {
-    try {
-      await fs.mkdir(this.outputDir, { recursive: true });
-    } catch (error) {
-      console.error('Error creating output directory:', error);
-    }
+  async _ensureOutputDir() {
+    await fs.mkdir(this.outputDir, { recursive: true }).catch(() => {});
   }
 
   /**
-   * Remediate PDF accessibility issues
+   * Remediate accessibility issues in a PDF.
+   *
+   * Pipeline:
+   *   1. pdf-lib applies metadata fixes (title, subject, creator, producer, keywords).
+   *   2. Python/pikepdf applies structural fixes (language, MarkInfo, DisplayDocTitle,
+   *      form field tooltips) that pdf-lib cannot perform.
+   *   3. Remaining issues that cannot be auto-fixed are returned with explanations.
+   *
+   * @param {string}  filePath  - Path to the original uploaded PDF.
+   * @param {Array}   issues    - Issue objects from AccessibilityAnalyzer.
+   * @param {object}  options   - { autoFix: boolean, jobId: string }
+   * @returns {Promise<object>} Remediation result.
    */
   async remediate(filePath, issues, options = {}) {
+    const { autoFix = true, jobId } = options;
+
+    logger.info({ filePath, issueCount: issues.length, autoFix }, 'Starting remediation');
+
+    const outputFileName = jobId ? `${jobId}-remediated.pdf` : `${uuidv4()}-remediated.pdf`;
+    const outputPath = path.join(this.outputDir, outputFileName);
+
+    const fixedIssues = [];
+    const remainingIssues = [];
+
+    // ── Step 1: pdf-lib metadata pass ──────────────────────────────────────────
+    let pdfBytes;
     try {
-      console.log(`Starting remediation for ${issues.length} issues`);
-      
-      const { autoFix = true } = options;
       const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      
-      const fixedIssues = [];
-      const remainingIssues = [];
-      
-      // Group issues by type for more efficient processing
-      const issuesByType = this.groupIssuesByType(issues);
-      
-      // Apply fixes based on issue types
-      if (issuesByType.metadata && autoFix) {
-        const metadataFixes = await this.fixMetadataIssues(pdfDoc, issuesByType.metadata);
-        fixedIssues.push(...metadataFixes);
-      }
-      
-      if (issuesByType.structure && autoFix) {
-        const structureFixes = await this.fixStructureIssues(pdfDoc, issuesByType.structure);
-        fixedIssues.push(...structureFixes);
-      }
-      
-      if (issuesByType.language && autoFix) {
-        const languageFixes = await this.fixLanguageIssues(pdfDoc, issuesByType.language);
-        fixedIssues.push(...languageFixes);
-      }
-      
-      if (issuesByType.reading && autoFix) {
-        const readingFixes = await this.fixReadingOrderIssues(pdfDoc, issuesByType.reading);
-        fixedIssues.push(...readingFixes);
-      }
+      const pdfDoc = await PDFDocument.load(dataBuffer, { ignoreEncryption: true });
 
-      // Auto-fix form field issues
-      if (issuesByType.form && issuesByType.form.length > 0 && autoFix) {
-        const formFixes = await this.fixFormIssues(pdfDoc, issuesByType.form);
-        fixedIssues.push(...formFixes);
-      }
-      
-      // Issues that require manual intervention
-      if (issuesByType.contrast) {
-        remainingIssues.push(...issuesByType.contrast.map(issue => ({
-          ...issue,
-          reason: 'Color contrast requires manual review and adjustment'
-        })));
-      }
-      
-      if (issuesByType.altText) {
-        remainingIssues.push(...issuesByType.altText.map(issue => ({
-          ...issue,
-          reason: 'Alternative text requires human judgment and context'
-        })));
-      }
-      
-      // Save remediated PDF
-      let remediatedPdfPath = null;
-      if (fixedIssues.length > 0) {
-        let outputFileName;
-        if (options.jobId) {
-          outputFileName = `${options.jobId}-remediated.pdf`;
-        } else {
-          outputFileName = `${uuidv4()}-remediated.pdf`;
-        }
-        remediatedPdfPath = path.join(this.outputDir, outputFileName);
-        
-        const pdfBytes = await pdfDoc.save();
-        await fs.writeFile(remediatedPdfPath, pdfBytes);
-        
-        console.log(`Remediated PDF saved to: ${remediatedPdfPath}`);
-      }
-      
-      return {
-        fixedIssues,
-        remainingIssues,
-        remediatedPdfPath,
-        summary: {
-          totalIssues: issues.length,
-          fixedCount: fixedIssues.length,
-          remainingCount: remainingIssues.length,
-          autoFixPercentage: Math.round((fixedIssues.length / issues.length) * 100)
-        }
-      };
-      
-    } catch (error) {
-      console.error('Error during remediation:', error);
-      throw new Error(`Failed to remediate PDF: ${error.message}`);
-    }
-  }
+      const metadataIssues = issues.filter((i) => i.id.startsWith('metadata-'));
+      this._applyMetadataFixes(pdfDoc, metadataIssues, fixedIssues);
 
-  /**
-   * Group issues by type for processing
-   */
-  groupIssuesByType(issues) {
-    const groups = {
-      metadata: [],
-      structure: [],
-      language: [],
-      reading: [],
-      contrast: [],
-      altText: [],
-      form: [],
-      other: []
-    };
-    
-    for (const issue of issues) {
-      if (issue.id.startsWith('metadata-')) {
-        groups.metadata.push(issue);
-      } else if (issue.id.startsWith('structure-')) {
-        groups.structure.push(issue);
-      } else if (issue.id.startsWith('language-')) {
-        groups.language.push(issue);
-      } else if (issue.id.startsWith('reading-')) {
-        groups.reading.push(issue);
-      } else if (issue.id.startsWith('contrast-')) {
-        groups.contrast.push(issue);
-      } else if (issue.id.startsWith('alt-text-')) {
-        groups.altText.push(issue);
-      } else if (issue.id.startsWith('form-')) {
-        groups.form.push(issue);
-      } else {
-        groups.other.push(issue);
-      }
-    }
-    
-    return groups;
-  }
-
-  /**
-   * Fix metadata-related issues
-   */
-  async fixMetadataIssues(pdfDoc, issues) {
-    const fixedIssues = [];
-    
-    for (const issue of issues) {
-      try {
-        if (issue.id === 'metadata-001') {
-          // Fix missing title
-          pdfDoc.setTitle('Accessible Document');
-          fixedIssues.push({
-            ...issue,
-            fixApplied: 'Added generic document title',
-            fixDetails: 'Set document title to "Accessible Document"'
-          });
-        }
-        
-        if (issue.id === 'metadata-002') {
-          // Fix missing subject
-          pdfDoc.setSubject('Document processed for accessibility compliance');
-          fixedIssues.push({
-            ...issue,
-            fixApplied: 'Added document subject',
-            fixDetails: 'Set subject describing accessibility processing'
-          });
-        }
-        
-        // Add creator and producer metadata
-        pdfDoc.setCreator('PDF Accessibility Tool');
-        pdfDoc.setProducer('PDF Accessibility Remediation Service v1.0');
-        
-      } catch (error) {
-        console.error(`Error fixing metadata issue ${issue.id}:`, error);
-      }
-    }
-    
-    return fixedIssues;
-  }
-
-  /**
-   * Fix structure-related issues
-   */
-  async fixStructureIssues(pdfDoc, issues) {
-    const fixedIssues = [];
-    
-    for (const issue of issues) {
-      try {
-        if (issue.id === 'structure-002') {
-          // Add basic bookmark structure
-          const pages = pdfDoc.getPages();
-          if (pages.length > 1) {
-            // This is a simplified bookmark creation
-            // In a full implementation, you'd analyze content to create meaningful bookmarks
-            fixedIssues.push({
-              ...issue,
-              fixApplied: 'Added basic document structure',
-              fixDetails: 'Created basic page-level bookmarks for navigation'
-            });
-          }
-        }
-        
-        if (issue.id === 'structure-001') {
-          // Basic tagging - this is complex and would require more sophisticated implementation
-          fixedIssues.push({
-            ...issue,
-            fixApplied: 'Applied basic document tags',
-            fixDetails: 'Added basic structural tags to document'
-          });
-        }
-        
-      } catch (error) {
-        console.error(`Error fixing structure issue ${issue.id}:`, error);
-      }
-    }
-    
-    return fixedIssues;
-  }
-
-  /**
-   * Fix language-related issues
-   */
-  async fixLanguageIssues(pdfDoc, issues) {
-    const fixedIssues = [];
-    
-    for (const issue of issues) {
-      try {
-        if (issue.id === 'language-001') {
-          // Set default language to English
-          // Note: pdf-lib doesn't directly support language setting
-          // This would be handled differently in a production implementation
-          fixedIssues.push({
-            ...issue,
-            fixApplied: 'Set document language',
-            fixDetails: 'Set primary document language to English'
-          });
-        }
-      } catch (error) {
-        console.error(`Error fixing language issue ${issue.id}:`, error);
-      }
-    }
-    
-    return fixedIssues;
-  }
-
-  /**
-   * Fix reading order issues
-   */
-  async fixReadingOrderIssues(pdfDoc, issues) {
-    const fixedIssues = [];
-    
-    for (const issue of issues) {
-      try {
-        if (issue.id === 'reading-order-001') {
-          // Basic reading order optimization
-          // This is a placeholder - real implementation would reorder content
-          fixedIssues.push({
-            ...issue,
-            fixApplied: 'Optimized reading order',
-            fixDetails: 'Applied logical reading order to document structure'
-          });
-        }
-      } catch (error) {
-        console.error(`Error fixing reading order issue ${issue.id}:`, error);
-      }
-    }
-    
-    return fixedIssues;
-  }
-
-  /**
-   * Fix form field accessibility issues by adding generic labels/descriptions
-   */
-  async fixFormIssues(pdfDoc, issues) {
-    const fixedIssues = [];
-    try {
-      const form = pdfDoc.getForm && pdfDoc.getForm();
-      if (!form) {
-        // pdf-lib: getForm() only works if the PDF has AcroForm
-        return fixedIssues;
-      }
-      const fields = form.getFields();
-      for (const issue of issues) {
-        // Try to match by field name in issue.id (e.g., form-FieldName)
-        const match = issue.id.match(/^form-(.+)$/);
-        let fieldName = match ? match[1] : null;
-        let field = fieldName ? fields.find(f => f.getName() === fieldName) : null;
-        if (!field && fields.length === 1) {
-          // If only one field, assume it's the one
-          field = fields[0];
-        }
-        if (field) {
-          // Set a generic label/tooltip if missing
-          try {
-            // pdf-lib does not support tooltips directly, but we can set the field name
-            if (!field.getName() || field.getName().startsWith('Field')) {
-              const newName = `AccessibleField_${field.getName() || '1'}`;
-              field.setName(newName);
-              fixedIssues.push({
-                ...issue,
-                fixApplied: 'Added generic field name',
-                fixDetails: `Set field name to ${newName}`
-              });
-            } else {
-              // Already has a name, mark as fixed for reporting
-              fixedIssues.push({
-                ...issue,
-                fixApplied: 'Field already named',
-                fixDetails: `Field name is ${field.getName()}`
-              });
-            }
-          } catch (err) {
-            // If setName fails, skip
-          }
-        }
-      }
+      pdfBytes = await pdfDoc.save();
     } catch (err) {
-      // If getForm fails, skip
+      logger.error({ err: err.message }, 'pdf-lib metadata pass failed');
+      throw new Error(`Metadata remediation failed: ${err.message}`);
     }
-    return fixedIssues;
-  }
 
-  /**
-   * Add accessibility features to PDF
-   */
-  async addAccessibilityFeatures(pdfDoc) {
-    try {
-      // Set PDF/UA identifier (simplified)
-      pdfDoc.setTitle('Accessibility Remediated Document');
-      pdfDoc.setSubject('Document processed for accessibility compliance');
-      pdfDoc.setKeywords('accessibility, WCAG, PDF/UA, remediated');
-      
-      // Add modification date
-      pdfDoc.setModificationDate(new Date());
-      
-      return true;
-    } catch (error) {
-      console.error('Error adding accessibility features:', error);
-      return false;
+    // Write the metadata-fixed PDF to the output path so Python can read it
+    await fs.writeFile(outputPath, pdfBytes);
+
+    // ── Step 2: Python/pikepdf structural pass ──────────────────────────────────
+    if (autoFix) {
+      const pythonFixes = this._buildPythonFixes(issues);
+      const hasPythonWork = Object.keys(pythonFixes).length > 0;
+
+      if (hasPythonWork) {
+        try {
+          const pyResult = await remediatePDF(outputPath, outputPath, pythonFixes);
+
+          if (pyResult.success) {
+            // Map applied fix descriptions back to issue IDs
+            this._reconcilePythonFixes(issues, pyResult.fixesApplied, fixedIssues);
+          } else {
+            logger.warn(
+              { errors: pyResult.errors },
+              'Python remediation reported errors; structural fixes may be incomplete'
+            );
+            // Move unfixed structural issues to remaining
+            this._moveUnfixedToRemaining(issues, fixedIssues, remainingIssues,
+              'Python remediation encountered errors — structural fixes require manual intervention');
+          }
+        } catch (err) {
+          logger.warn({ err: err.message }, 'Python remediation unavailable; skipping structural fixes');
+          this._moveUnfixedToRemaining(issues, fixedIssues, remainingIssues,
+            'Python is not available — install Python 3 with pikepdf to enable structural fixes');
+        }
+      }
     }
-  }
 
-  /**
-   * Generate remediation summary
-   */
-  generateRemediationSummary(originalIssues, fixedIssues, remainingIssues) {
-    const summary = {
-      totalIssues: originalIssues.length,
-      fixedIssues: fixedIssues.length,
-      remainingIssues: remainingIssues.length,
-      successRate: Math.round((fixedIssues.length / originalIssues.length) * 100),
-      fixesByCategory: {},
-      remainingByCategory: {}
+    // ── Step 3: Categorise remaining issues ────────────────────────────────────
+    for (const issue of issues) {
+      const alreadyFixed = fixedIssues.some((f) => f.id === issue.id);
+      if (alreadyFixed) { continue; }
+
+      let reason;
+      if (!autoFix) {
+        reason = 'Auto-fix was not requested';
+      } else if (issue.id.startsWith('alt-text-')) {
+        reason = 'Alternative text requires human judgment about image content';
+      } else if (issue.id.startsWith('contrast-')) {
+        reason = 'Color contrast corrections require manual editing in the source application';
+      } else if (issue.id.startsWith('reading-order-') || issue.id === 'reading-order-001') {
+        reason = 'Reading order remediation requires rebuilding the document structure tree, ' +
+          'which must be done in a PDF authoring tool (Adobe Acrobat Pro, Foxit, etc.)';
+      } else if (issue.id.startsWith('heading-')) {
+        reason = 'Heading structure must be established in the source document and re-exported';
+      } else if (!issue.fixable) {
+        reason = 'This issue requires manual review and cannot be automatically corrected';
+      } else {
+        reason = 'Issue was not addressed in this remediation pass';
+      }
+
+      remainingIssues.push({ ...issue, reason });
+    }
+
+    const totalIssues = issues.length;
+    const fixedCount = fixedIssues.length;
+
+    logger.info(
+      { outputPath, fixedCount, remainingCount: remainingIssues.length },
+      'Remediation complete'
+    );
+
+    return {
+      fixedIssues,
+      remainingIssues,
+      remediatedPdfPath: outputPath,
+      summary: {
+        totalIssues,
+        fixedCount,
+        remainingCount: remainingIssues.length,
+        autoFixPercentage: totalIssues > 0
+          ? Math.round((fixedCount / totalIssues) * 100)
+          : 0,
+      },
     };
-    
-    // Group fixes by category
-    for (const issue of fixedIssues) {
-      const category = issue.wcagRule || 'Other';
-      summary.fixesByCategory[category] = (summary.fixesByCategory[category] || 0) + 1;
+  }
+
+  // ─── Private helpers ────────────────────────────────────────────────────────
+
+  /**
+   * Apply title, subject, and producer metadata via pdf-lib.
+   * These are genuine changes that AT and document management systems use.
+   */
+  _applyMetadataFixes(pdfDoc, metadataIssues, fixedIssues) {
+    // Always stamp creator/producer so the tool is identified
+    pdfDoc.setCreator('PDF Accessibility Tool');
+    pdfDoc.setProducer('PDF Accessibility Remediation Service');
+    pdfDoc.setModificationDate(new Date());
+
+    for (const issue of metadataIssues) {
+      if (issue.id === 'metadata-001') {
+        pdfDoc.setTitle('Accessible Document');
+        fixedIssues.push({
+          ...issue,
+          fixApplied: 'Document title set',
+          fixDetails:
+            'Set PDF /Title metadata to "Accessible Document". Update with a descriptive title ' +
+            'matching the document content.',
+        });
+      } else if (issue.id === 'metadata-002') {
+        pdfDoc.setSubject('Document processed for accessibility compliance');
+        fixedIssues.push({
+          ...issue,
+          fixApplied: 'Document subject set',
+          fixDetails: 'Set PDF /Subject metadata describing accessibility processing.',
+        });
+      }
     }
-    
-    // Group remaining issues by category
-    for (const issue of remainingIssues) {
-      const category = issue.wcagRule || 'Other';
-      summary.remainingByCategory[category] = (summary.remainingByCategory[category] || 0) + 1;
-    }
-    
-    return summary;
   }
 
   /**
-   * Validate remediated PDF
+   * Determine which fixes Python should apply based on the outstanding issues.
    */
-  async validateRemediatedPDF(filePath) {
-    try {
-      const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      
-      // Basic validation checks
-      const validation = {
-        isValid: true,
-        hasTitle: !!pdfDoc.getTitle(),
-        hasSubject: !!pdfDoc.getSubject(),
-        pageCount: pdfDoc.getPageCount(),
-        errors: []
-      };
-      
-      return validation;
-    } catch (error) {
-      return {
-        isValid: false,
-        errors: [error.message]
-      };
+  _buildPythonFixes(issues) {
+    const fixes = {};
+    const ids = new Set(issues.map((i) => i.id));
+
+    if (ids.has('language-001')) {
+      fixes.setLanguage = 'en';
+    }
+
+    if (ids.has('structure-001')) {
+      // Set MarkInfo/Marked=true and DisplayDocTitle for better AT compatibility.
+      // Note: this is a formal flag, not a full PDF/UA structure tree — we are
+      // transparent about this in the fix description.
+      fixes.markTagged = true;
+      fixes.displayDocTitle = true;
+    } else if (ids.has('metadata-001')) {
+      // Even without a tagging issue, enabling DisplayDocTitle is always beneficial
+      fixes.displayDocTitle = true;
+    }
+
+    // Add tooltips to form fields that lack them
+    const hasFormTooltipIssue = issues.some(
+      (i) => i.id.startsWith('form-tooltip-') || i.id === 'form-001'
+    );
+    if (hasFormTooltipIssue) {
+      fixes.formTooltips = true;
+    }
+
+    return fixes;
+  }
+
+  /**
+   * After Python runs, mark the corresponding issues as fixed.
+   */
+  _reconcilePythonFixes(issues, appliedDescriptions, fixedIssues) {
+    for (const issue of issues) {
+      const alreadyFixed = fixedIssues.some((f) => f.id === issue.id);
+      if (alreadyFixed) { continue; }
+
+      let matched = false;
+
+      if (issue.id === 'language-001' &&
+          appliedDescriptions.some((d) => d.toLowerCase().includes('language'))) {
+        fixedIssues.push({
+          ...issue,
+          fixApplied: 'Document language set to English (en)',
+          fixDetails: 'Set PDF catalog /Lang = "en". Screen readers will now select the correct voice profile.',
+        });
+        matched = true;
+      }
+
+      if (issue.id === 'structure-001' &&
+          appliedDescriptions.some((d) => d.includes('MarkInfo'))) {
+        fixedIssues.push({
+          ...issue,
+          fixApplied: 'MarkInfo/Marked flag set; DisplayDocTitle enabled',
+          fixDetails:
+            'Set /MarkInfo/Marked = true (signals structured content to AT) and ' +
+            '/ViewerPreferences/DisplayDocTitle = true (shows title in viewer title bar). ' +
+            'Note: a full PDF/UA structure tree was not added — complex documents should be ' +
+            're-authored in a tool such as Adobe Acrobat Pro for complete tagging.',
+        });
+        matched = true;
+      }
+
+      if ((issue.id.startsWith('form-tooltip-') || issue.id === 'form-001') &&
+          appliedDescriptions.some((d) => d.toLowerCase().includes('tooltip'))) {
+        fixedIssues.push({
+          ...issue,
+          fixApplied: 'Accessible tooltip (/TU) added to form field',
+          fixDetails:
+            'Added /TU (user-visible tooltip) entry to form fields that lacked one. ' +
+            'Review generated tooltips and replace with field-specific descriptions.',
+        });
+        matched = true;
+      }
+
+      if (!matched && issue.id === 'metadata-001' &&
+          appliedDescriptions.some((d) => d.includes('DisplayDocTitle'))) {
+        // DisplayDocTitle fix is a bonus — metadata-001 already handled by pdf-lib
+      }
+    }
+  }
+
+  /**
+   * Move issues that were not fixed (and weren't already in fixedIssues)
+   * to remainingIssues with the provided reason.
+   */
+  _moveUnfixedToRemaining(issues, fixedIssues, remainingIssues, reason) {
+    for (const issue of issues) {
+      const alreadyFixed = fixedIssues.some((f) => f.id === issue.id);
+      const alreadyRemaining = remainingIssues.some((r) => r.id === issue.id);
+      if (!alreadyFixed && !alreadyRemaining && issue.fixable) {
+        remainingIssues.push({ ...issue, reason });
+      }
     }
   }
 }

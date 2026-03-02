@@ -1,189 +1,128 @@
+'use strict';
+
 const fs = require('fs').promises;
 const pdfParse = require('pdf-parse');
-const { PDFDocument, rgb } = require('pdf-lib');
-const path = require('path');
+const { PDFDocument } = require('pdf-lib');
+const logger = require('../logger');
 
 class PDFProcessor {
-  constructor() {
-    this.supportedFormats = ['application/pdf'];
-  }
-
   /**
-   * Extract basic information from PDF
+   * Extract basic information from a PDF using pdf-parse and pdf-lib.
+   * pdf-parse provides real text/metadata extraction from the PDF byte stream.
    */
   async extractInfo(filePath) {
+    const dataBuffer = await fs.readFile(filePath);
+    const fileSize = (await fs.stat(filePath)).size;
+
+    // Load with pdf-lib (always works when the PDF is structurally valid)
+    let pdfDoc;
     try {
-      const dataBuffer = await fs.readFile(filePath);
-      const pdfData = await pdfParse(dataBuffer);
-      
-      // Load PDF with pdf-lib for more detailed analysis
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      const pages = pdfDoc.getPages();
-      
-      const info = {
-        pageCount: pdfData.numpages,
-        textContent: pdfData.text,
-        wordCount: pdfData.text.split(/\s+/).length,
-        title: pdfData.info?.Title || 'Untitled',
-        author: pdfData.info?.Author || 'Unknown',
-        creator: pdfData.info?.Creator || 'Unknown',
-        producer: pdfData.info?.Producer || 'Unknown',
-        creationDate: pdfData.info?.CreationDate || null,
-        modificationDate: pdfData.info?.ModDate || null,
-        subject: pdfData.info?.Subject || '',
-        keywords: pdfData.info?.Keywords || '',
-        fileSize: (await fs.stat(filePath)).size,
-        pages: []
-      };
-
-      // Extract page-specific information
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        const { width, height } = page.getSize();
-        
-        info.pages.push({
-          pageNumber: i + 1,
-          width,
-          height,
-          rotation: page.getRotation().angle || 0
-        });
-      }
-
-      return info;
+      pdfDoc = await PDFDocument.load(dataBuffer, { ignoreEncryption: true });
     } catch (error) {
-      console.error('Error extracting PDF info:', error);
+      logger.error({ err: error.message, filePath }, 'pdf-lib failed to load PDF');
       throw new Error(`Failed to extract PDF information: ${error.message}`);
     }
-  }
 
-  /**
-   * Extract text content with position information
-   */
-  async extractTextWithPositions(filePath) {
+    const pages = pdfDoc.getPages();
+
+    // Attempt text + metadata extraction via pdf-parse.
+    // pdf-parse uses an older pdf.js engine that may fail on some compression
+    // variants — fall back gracefully to pdf-lib getters when that happens.
+    let pdfData = null;
     try {
-      const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      const pages = pdfDoc.getPages();
-      
-      const textElements = [];
-      
-      // This is a simplified version - in a real implementation,
-      // you'd use a more sophisticated PDF parsing library
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        // Note: pdf-lib doesn't provide text extraction with positions
-        // In a production app, you'd use pdf2json or similar
-        textElements.push({
-          pageNumber: i + 1,
-          text: `Page ${i + 1} content`, // Placeholder
-          x: 0,
-          y: 0,
-          width: page.getSize().width,
-          height: page.getSize().height
-        });
-      }
-      
-      return textElements;
-    } catch (error) {
-      throw new Error(`Failed to extract text with positions: ${error.message}`);
+      pdfData = await pdfParse(dataBuffer);
+    } catch (err) {
+      logger.warn(
+        { err: err.message, filePath },
+        'pdf-parse failed — using pdf-lib metadata fallback'
+      );
     }
+
+    const text = pdfData?.text || '';
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
+    const info = {
+      pageCount: pdfData?.numpages || pages.length,
+      textContent: text,
+      wordCount,
+      // Prefer pdf-lib getters (read directly from the loaded object tree) for
+      // structured metadata fields; they are more reliable than pdf-parse's Info
+      // dictionary which can retain state between calls in some environments.
+      title: pdfDoc.getTitle()?.trim() || pdfData?.info?.Title?.trim() || '',
+      author: pdfDoc.getAuthor()?.trim() || pdfData?.info?.Author?.trim() || '',
+      creator: pdfDoc.getCreator()?.trim() || pdfData?.info?.Creator?.trim() || '',
+      producer: pdfDoc.getProducer()?.trim() || pdfData?.info?.Producer?.trim() || '',
+      creationDate: pdfData?.info?.CreationDate || null,
+      modificationDate: pdfData?.info?.ModDate || null,
+      subject: pdfDoc.getSubject()?.trim() || pdfData?.info?.Subject?.trim() || '',
+      keywords: pdfDoc.getKeywords()?.trim() || pdfData?.info?.Keywords?.trim() || '',
+      fileSize,
+      pages: [],
+    };
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      const { width, height } = page.getSize();
+      info.pages.push({
+        pageNumber: i + 1,
+        width,
+        height,
+        rotation: page.getRotation().angle || 0,
+      });
+    }
+
+    return info;
   }
 
   /**
-   * Extract images from PDF
-   */
-  async extractImages(filePath) {
-    try {
-      const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      
-      const images = [];
-      
-      // This is a simplified implementation
-      // In production, you'd use a library like pdf-img-convert
-      const pages = pdfDoc.getPages();
-      
-      for (let i = 0; i < pages.length; i++) {
-        // Placeholder for image extraction
-        images.push({
-          pageNumber: i + 1,
-          imageCount: 0, // Would be actual count
-          images: [] // Would contain actual image data
-        });
-      }
-      
-      return images;
-    } catch (error) {
-      throw new Error(`Failed to extract images: ${error.message}`);
-    }
-  }
-
-  /**
-   * Check if PDF has interactive elements
+   * Detect interactive form elements using pdf-lib.
+   * pdf-lib natively supports AcroForm field enumeration.
    */
   async hasInteractiveElements(filePath) {
     try {
       const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      
-      // Check for form fields
+      const pdfDoc = await PDFDocument.load(dataBuffer, { ignoreEncryption: true });
       const form = pdfDoc.getForm();
       const fields = form.getFields();
-      
+
       return {
         hasForm: fields.length > 0,
         fieldCount: fields.length,
-        fields: fields.map(field => ({
+        fields: fields.map((field) => ({
           name: field.getName(),
-          type: field.constructor.name
-        }))
+          type: field.constructor.name,
+        })),
       };
-    } catch (error) {
-      return {
-        hasForm: false,
-        fieldCount: 0,
-        fields: []
-      };
+    } catch (_) {
+      return { hasForm: false, fieldCount: 0, fields: [] };
     }
   }
 
   /**
-   * Get PDF structure information
-   */
-  async getStructure(filePath) {
-    try {
-      const dataBuffer = await fs.readFile(filePath);
-      const pdfDoc = await PDFDocument.load(dataBuffer);
-      
-      return {
-        hasBookmarks: false, // Would check for actual bookmarks
-        hasOutline: false,   // Would check for document outline
-        isTagged: false,     // Would check for PDF/UA tags
-        hasMetadata: true,   // Basic metadata check
-        version: '1.4'       // Would extract actual PDF version
-      };
-    } catch (error) {
-      throw new Error(`Failed to get PDF structure: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validate PDF file
+   * Validate that the file is a parseable PDF.
+   * Performs magic-bytes verification to catch MIME-type spoofing,
+   * then attempts a full structural load.
    */
   async validatePDF(filePath) {
     try {
+      // Read first 5 bytes to verify PDF magic header (%PDF-)
+      const fd = await fs.open(filePath, 'r');
+      const magicBuf = Buffer.alloc(5);
+      await fd.read(magicBuf, 0, 5, 0);
+      await fd.close();
+
+      if (magicBuf.toString('ascii') !== '%PDF-') {
+        return {
+          isValid: false,
+          errors: ['File does not appear to be a valid PDF (magic bytes check failed)'],
+        };
+      }
+
       const dataBuffer = await fs.readFile(filePath);
-      await PDFDocument.load(dataBuffer);
-      
-      return {
-        isValid: true,
-        errors: []
-      };
+      await PDFDocument.load(dataBuffer, { ignoreEncryption: true });
+      return { isValid: true, errors: [] };
     } catch (error) {
-      return {
-        isValid: false,
-        errors: [error.message]
-      };
+      return { isValid: false, errors: [error.message] };
     }
   }
 }

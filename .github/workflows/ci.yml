@@ -7,14 +7,44 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Node.js
+
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
-      - run: npm run lint || echo "No lint script yet"
-      - run: npm test || echo "No tests yet" 
+          cache: 'npm'
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          DB_PATH: ':memory:'
+          LOG_LEVEL: silent
+          PYTHON_PATH: python3
+
+      - name: Upload coverage (optional)
+        if: success()
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          DB_PATH: ':memory:'

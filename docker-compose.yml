@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: pdf-accessibility
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # ALLOWED_ORIGINS: 'https://yourdomain.com'
+      PYTHON_PATH: python3
+      PYTHON_TIMEOUT_MS: 60000
+      MAX_FILE_SIZE: 52428800
+      UPLOAD_DIR: /data/uploads
+      OUTPUT_DIR: /data/output
+      REPORTS_DIR: /data/reports
+      DB_PATH: /data/jobs.json
+      LOG_LEVEL: info
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      CLEANUP_INTERVAL_HOURS: 1
+      FILE_RETENTION_HOURS: 24
+    volumes:
+      # Persist uploaded files, output PDFs, reports, and DB across restarts
+      - pdf_data:/data
+    healthcheck:
+      test: ['CMD', 'node', '-e',
+        "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  pdf_data:
+    driver: local

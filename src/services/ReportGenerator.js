@@ -1,5 +1,8 @@
+'use strict';
+
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../logger');
 
 class ReportGenerator {
   constructor() {
@@ -8,11 +11,7 @@ class ReportGenerator {
   }
 
   async ensureReportsDir() {
-    try {
-      await fs.mkdir(this.reportsDir, { recursive: true });
-    } catch (error) {
-      console.error('Error creating reports directory:', error);
-    }
+    await fs.mkdir(this.reportsDir, { recursive: true }).catch(() => {});
   }
 
   /**
@@ -27,18 +26,29 @@ class ReportGenerator {
         accessibilityIssues,
         remediationResult,
         wcagLevel,
-        status
+        status,
+        pythonEnhanced = false,
       } = data;
 
-      const reportPath = path.join(this.reportsDir, `${jobId}-report.html`);
-      
-      // Always use the actual level, fallback to 'AA' if missing
       const actualLevel = wcagLevel || 'AA';
-      if (!wcagLevel) {
-        console.warn(`[ReportGenerator] No WCAG level provided for job ${jobId}, defaulting to 'AA'`);
-      } else {
-        console.log(`[ReportGenerator] Generating report for job ${jobId} with WCAG level: ${actualLevel}`);
-      }
+      const generatedAt = new Date().toISOString();
+
+      const reportPath = path.join(this.reportsDir, `${jobId}-report.html`);
+      const dataPath = path.join(this.reportsDir, `${jobId}-data.json`);
+
+      // Save raw JSON data for export endpoints
+      const reportData = {
+        jobId,
+        filename,
+        pdfInfo,
+        accessibilityIssues,
+        remediationResult,
+        wcagLevel: actualLevel,
+        status,
+        pythonEnhanced,
+        generatedAt,
+      };
+      await fs.writeFile(dataPath, JSON.stringify(reportData, null, 2), 'utf8');
 
       const htmlContent = this.generateHTML({
         jobId,
@@ -48,16 +58,17 @@ class ReportGenerator {
         remediationResult,
         wcagLevel: actualLevel,
         status,
-        generatedAt: new Date().toISOString()
+        pythonEnhanced,
+        generatedAt,
       });
 
       await fs.writeFile(reportPath, htmlContent, 'utf8');
-      
-      console.log(`Report generated: ${reportPath}`);
+
+      logger.info({ reportPath }, 'Report generated');
       return reportPath;
-      
+
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error({ err: error.message }, 'Error generating report');
       throw new Error(`Failed to generate report: ${error.message}`);
     }
   }
@@ -74,7 +85,8 @@ class ReportGenerator {
       remediationResult,
       wcagLevel,
       status,
-      generatedAt
+      pythonEnhanced = false,
+      generatedAt,
     } = data;
 
     const issuesBySeverity = this.groupIssuesBySeverity(accessibilityIssues);
@@ -110,6 +122,12 @@ class ReportGenerator {
                 </div>
                 <div class="meta-item">
                     <strong>Job ID:</strong> ${jobId}
+                </div>
+                <div class="meta-item">
+                    <strong>Analysis:</strong>
+                    <span class="status status-${pythonEnhanced ? 'analyzed' : 'processing'}">
+                        ${pythonEnhanced ? 'Python-enhanced (pikepdf + pdfplumber)' : 'Basic (Python unavailable)'}
+                    </span>
                 </div>
             </div>
         </header>
