@@ -10,7 +10,6 @@ process.env.DB_PATH = ':memory:';
 
 const request = require('supertest');
 const fs = require('fs').promises;
-const path = require('path');
 const { createTestPDF, createNoTitlePDF } = require('./helpers/createTestPDF');
 
 // Import app AFTER setting env vars so DB initializes with :memory:

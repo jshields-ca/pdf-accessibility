@@ -359,7 +359,9 @@ class ReportGenerator {
    * Generate remediation section
    */
   generateRemediationSection(remediationResult) {
-    if (!remediationResult) return '';
+    if (!remediationResult) {
+      return '';
+    }
 
     const { summary, fixedIssues, remainingIssues } = remediationResult;
 
@@ -501,7 +503,9 @@ class ReportGenerator {
    * Generate remediation summary
    */
   generateRemediationSummary(remediationResult) {
-    if (!remediationResult || !remediationResult.summary) return '';
+    if (!remediationResult || !remediationResult.summary) {
+      return '';
+    }
 
     const { summary } = remediationResult;
     return `
@@ -525,7 +529,9 @@ class ReportGenerator {
   groupIssuesBySeverity(issues) {
     return issues.reduce((groups, issue) => {
       const severity = issue.severity || 'unknown';
-      if (!groups[severity]) groups[severity] = [];
+      if (!groups[severity]) {
+        groups[severity] = [];
+      }
       groups[severity].push(issue);
       return groups;
     }, {});
@@ -537,7 +543,9 @@ class ReportGenerator {
   groupIssuesByWCAG(issues) {
     return issues.reduce((groups, issue) => {
       const rule = issue.wcagRule || 'Unknown';
-      if (!groups[rule]) groups[rule] = [];
+      if (!groups[rule]) {
+        groups[rule] = [];
+      }
       groups[rule].push(issue);
       return groups;
     }, {});
@@ -563,9 +571,13 @@ class ReportGenerator {
    * Format file size
    */
   formatFileSize(bytes) {
-    if (!bytes) return 'Unknown';
+    if (!bytes) {
+      return 'Unknown';
+    }
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   }
@@ -577,8 +589,7 @@ class ReportGenerator {
     const recommendations = [];
     
     const criticalIssues = issues.filter(i => i.severity === 'critical');
-    const moderateIssues = issues.filter(i => i.severity === 'moderate');
-    
+
     if (criticalIssues.length > 0) {
       recommendations.push({
         title: 'Address Critical Accessibility Issues',
@@ -632,7 +643,9 @@ class ReportGenerator {
    * Helper to map WCAG rule numbers to URLs
    */
   getWCAGRuleUrl(rule) {
-    if (!rule) return null;
+    if (!rule) {
+      return null;
+    }
     const mapping = {
       '1.1.1': 'non-text-content',
       '1.3.1': 'info-and-relationships',
@@ -648,7 +661,9 @@ class ReportGenerator {
       '4.1.2': 'name-role-value',
     };
     const fragment = mapping[rule];
-    if (!fragment) return null;
+    if (!fragment) {
+      return null;
+    }
     return `https://www.w3.org/WAI/WCAG21/Understanding/${fragment}.html`;
   }
 
