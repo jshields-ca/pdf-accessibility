@@ -84,7 +84,13 @@ Thumbs.db
 *~ 
 
 # Reports directory (generated output)
-reports/ 
+reports/
 
 # Uploads directory (user-uploaded files)
-uploads/ 
+uploads/
+
+# Output directory (remediated PDFs)
+output/
+
+# Runtime data directory (job store)
+data/ 

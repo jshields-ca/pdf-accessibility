@@ -1,5 +1,8 @@
+'use strict';
+
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../logger');
 
 class ReportGenerator {
   constructor() {
@@ -8,11 +11,7 @@ class ReportGenerator {
   }
 
   async ensureReportsDir() {
-    try {
-      await fs.mkdir(this.reportsDir, { recursive: true });
-    } catch (error) {
-      console.error('Error creating reports directory:', error);
-    }
+    await fs.mkdir(this.reportsDir, { recursive: true }).catch(() => {});
   }
 
   /**
@@ -27,18 +26,29 @@ class ReportGenerator {
         accessibilityIssues,
         remediationResult,
         wcagLevel,
-        status
+        status,
+        pythonEnhanced = false,
       } = data;
 
-      const reportPath = path.join(this.reportsDir, `${jobId}-report.html`);
-      
-      // Always use the actual level, fallback to 'AA' if missing
       const actualLevel = wcagLevel || 'AA';
-      if (!wcagLevel) {
-        console.warn(`[ReportGenerator] No WCAG level provided for job ${jobId}, defaulting to 'AA'`);
-      } else {
-        console.log(`[ReportGenerator] Generating report for job ${jobId} with WCAG level: ${actualLevel}`);
-      }
+      const generatedAt = new Date().toISOString();
+
+      const reportPath = path.join(this.reportsDir, `${jobId}-report.html`);
+      const dataPath = path.join(this.reportsDir, `${jobId}-data.json`);
+
+      // Save raw JSON data for export endpoints
+      const reportData = {
+        jobId,
+        filename,
+        pdfInfo,
+        accessibilityIssues,
+        remediationResult,
+        wcagLevel: actualLevel,
+        status,
+        pythonEnhanced,
+        generatedAt,
+      };
+      await fs.writeFile(dataPath, JSON.stringify(reportData, null, 2), 'utf8');
 
       const htmlContent = this.generateHTML({
         jobId,
@@ -48,16 +58,17 @@ class ReportGenerator {
         remediationResult,
         wcagLevel: actualLevel,
         status,
-        generatedAt: new Date().toISOString()
+        pythonEnhanced,
+        generatedAt,
       });
 
       await fs.writeFile(reportPath, htmlContent, 'utf8');
-      
-      console.log(`Report generated: ${reportPath}`);
+
+      logger.info({ reportPath }, 'Report generated');
       return reportPath;
-      
+
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error({ err: error.message }, 'Error generating report');
       throw new Error(`Failed to generate report: ${error.message}`);
     }
   }
@@ -74,7 +85,8 @@ class ReportGenerator {
       remediationResult,
       wcagLevel,
       status,
-      generatedAt
+      pythonEnhanced = false,
+      generatedAt,
     } = data;
 
     const issuesBySeverity = this.groupIssuesBySeverity(accessibilityIssues);
@@ -110,6 +122,12 @@ class ReportGenerator {
                 </div>
                 <div class="meta-item">
                     <strong>Job ID:</strong> ${jobId}
+                </div>
+                <div class="meta-item">
+                    <strong>Analysis:</strong>
+                    <span class="status status-${pythonEnhanced ? 'analyzed' : 'processing'}">
+                        ${pythonEnhanced ? 'Python-enhanced (pikepdf + pdfplumber)' : 'Basic (Python unavailable)'}
+                    </span>
                 </div>
             </div>
         </header>
@@ -341,7 +359,9 @@ class ReportGenerator {
    * Generate remediation section
    */
   generateRemediationSection(remediationResult) {
-    if (!remediationResult) return '';
+    if (!remediationResult) {
+      return '';
+    }
 
     const { summary, fixedIssues, remainingIssues } = remediationResult;
 
@@ -483,7 +503,9 @@ class ReportGenerator {
    * Generate remediation summary
    */
   generateRemediationSummary(remediationResult) {
-    if (!remediationResult || !remediationResult.summary) return '';
+    if (!remediationResult || !remediationResult.summary) {
+      return '';
+    }
 
     const { summary } = remediationResult;
     return `
@@ -507,7 +529,9 @@ class ReportGenerator {
   groupIssuesBySeverity(issues) {
     return issues.reduce((groups, issue) => {
       const severity = issue.severity || 'unknown';
-      if (!groups[severity]) groups[severity] = [];
+      if (!groups[severity]) {
+        groups[severity] = [];
+      }
       groups[severity].push(issue);
       return groups;
     }, {});
@@ -519,7 +543,9 @@ class ReportGenerator {
   groupIssuesByWCAG(issues) {
     return issues.reduce((groups, issue) => {
       const rule = issue.wcagRule || 'Unknown';
-      if (!groups[rule]) groups[rule] = [];
+      if (!groups[rule]) {
+        groups[rule] = [];
+      }
       groups[rule].push(issue);
       return groups;
     }, {});
@@ -545,9 +571,13 @@ class ReportGenerator {
    * Format file size
    */
   formatFileSize(bytes) {
-    if (!bytes) return 'Unknown';
+    if (!bytes) {
+      return 'Unknown';
+    }
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   }
@@ -559,8 +589,7 @@ class ReportGenerator {
     const recommendations = [];
     
     const criticalIssues = issues.filter(i => i.severity === 'critical');
-    const moderateIssues = issues.filter(i => i.severity === 'moderate');
-    
+
     if (criticalIssues.length > 0) {
       recommendations.push({
         title: 'Address Critical Accessibility Issues',
@@ -614,7 +643,9 @@ class ReportGenerator {
    * Helper to map WCAG rule numbers to URLs
    */
   getWCAGRuleUrl(rule) {
-    if (!rule) return null;
+    if (!rule) {
+      return null;
+    }
     const mapping = {
       '1.1.1': 'non-text-content',
       '1.3.1': 'info-and-relationships',
@@ -630,7 +661,9 @@ class ReportGenerator {
       '4.1.2': 'name-role-value',
     };
     const fragment = mapping[rule];
-    if (!fragment) return null;
+    if (!fragment) {
+      return null;
+    }
     return `https://www.w3.org/WAI/WCAG21/Understanding/${fragment}.html`;
   }
 
